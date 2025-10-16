@@ -100,10 +100,6 @@ Worth the extra 200ms for stealth operations!
 
 ### ✨ Key Visual Features
 
-#### Custom Title Bar
-- Clean black title bar with application icon and version
-- Modern window controls (minimize/close) with hover effects
-- Borderless window design with custom drag functionality
 
 #### Card-Based Layout
 - Both Inject and Eject sections housed in elevated card-style containers
