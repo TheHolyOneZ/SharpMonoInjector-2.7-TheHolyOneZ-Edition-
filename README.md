@@ -2,7 +2,7 @@
 
 A complete visual overhaul of SharpMonoInjector with a modern dark theme, enhanced user experience, and advanced stealth injection capabilities.
 
-![SharpMonoInjector GUI](Images/NewScreen.png)
+![SharpMonoInjector GUI](Images/NewScreen1.png)
 
 ## 🆕 What's New in v2.5 (Latest Update)
 
