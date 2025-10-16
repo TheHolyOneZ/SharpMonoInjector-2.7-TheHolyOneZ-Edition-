@@ -76,7 +76,7 @@ A complete visual overhaul of SharpMonoInjector with a modern dark theme, enhanc
 
 Worth the extra 200ms for stealth operations!
 
-## What's New in TheHolyOneZ Edition v2.5
+## What's New in TheHolyOneZ Edition (Design) v2.5
 
 ### 🎨 Design Enhancements
 
