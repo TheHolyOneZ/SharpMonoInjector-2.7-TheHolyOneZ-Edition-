@@ -1,232 +1,282 @@
-# SharpMonoInjector TheHolyOneZ Edition v2.5
+# SharpMonoInjector TheHolyOneZ Edition v2.6
 
-A complete visual overhaul of SharpMonoInjector with a modern dark theme, enhanced user experience, and advanced stealth injection capabilities.
+A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, and a **beautiful dark UI** designed for both power users and security researchers.
 
-![SharpMonoInjector GUI](Images/NewScreen1.png)
+This version builds upon **v2.5 TheHolyOneZ Edition**, retaining the complete **visual overhaul**, **stealth injection system**, and **performance optimizations**, while introducing new **automation tools**, **real-time insights**, and **workflow efficiency** features.
 
-## 🆕 What's New in v2.5 (Latest Update)
+![SharpMonoInjector GUI](Images/AllWindows.png)
 
-### 🥷 Stealth Injection System
+---
 
-**NEW**: Advanced anti-detection features for bypassing monitoring and anti-cheat systems.
+## 🧭 Overview
 
-#### Enable Stealth Mode Checkbox
-- One-click toggle for all stealth features
-- Visual indicator in status bar when stealth is active
-- Shows "Injection successful (STEALTH MODE)" on completion
+**SharpMonoInjector** allows injecting managed assemblies into Mono-embedded applications (most commonly Unity Engine based games). Unlike traditional injectors, the target process *does not need to restart* after updating your assembly — ideal for debugging or runtime modding.
 
-#### Stealth Features
+Both **x86** and **x64** architectures are supported.
 
-**1. Memory Randomization**
-- Adds 4-64 random NOP instructions before shellcode execution
-- Makes memory patterns unpredictable and harder to signature-scan
-- Randomizes on every injection for maximum variance
+---
 
-**2. Thread Hiding**
-- Creates threads with `CREATE_SUSPENDED` flag
-- Uses `NtSetInformationThread` to hide from thread enumeration tools
-- Properly resumes threads after hiding to prevent freezing
-- Evades basic thread scanning tools
+## 🆕 What's New in v2.6 (Latest Release)
 
-**3. Execution Delay**
-- 150ms delay before injection starts
-- Helps evade time-based behavioral analysis
-- Configurable delay timing in code
+### 🚀 Major Additions
 
-**4. Debugger Detection**
-- Checks if target process has a debugger attached
-- Displays warning: "WARNING: Target process is being debugged!"
-- Helps avoid detection by runtime debugging tools
+#### 🖤 Real-Time Logging (NEW)
 
-**5. Code Obfuscation** *(Experimental - Currently Disabled)*
-- XOR encryption of shellcode with random key
-- Dynamic decoder stub generated at runtime
-- Disabled by default for stability
+* Live log viewer integrated directly into the GUI
+* Color-coded by level: Info, Success, Warning, Error
+* Search and filter logs instantly
+* Export logs to `.txt` or `.log`
+* Clear logs with one click
+* Logs also saved to `DebugLog.txt` for persistence
 
-### 🐛 Bug Fixes in v2.5
+#### 🧩 Profile Management (NEW)
 
-**Process Selection Fix**
-- Fixed ComboBox not displaying selected Mono process
-- Resolved `INotifyPropertyChanged` binding issue in `SelectedProcess` property
-- Process names now properly display after refresh
+* Save, load, rename, and delete multiple injection profiles per game
+* Profiles store process name, assembly path, namespace, class, method, and stealth mode preference
+* Load profiles instantly to auto-fill all injector fields
+* Convenient rename ✏️ and delete ✕ icons next to profiles
 
-**Thread Management - Development Phase**
-- Fixed application freezing when using stealth mode
-- Added `ResumeThread` call after thread hiding
-- Proper thread lifecycle management
+#### 🔍 Process Monitor (NEW)
 
-### 🔧 Technical Additions
+* Watch processes automatically and trigger injections when targets appear
+* Assign profiles to specific processes for full automation
+* Filter for Mono/Unity-based games only
+* Supports background monitoring with configurable polling interval
 
-**New Files Modified:**
-- `Injector.cs` - Complete stealth system implementation with `InjectionOptions` class
-- `Native.cs` - Added `CheckRemoteDebuggerPresent`, `NtSetInformationThread`, `ResumeThread` P/Invoke methods
-- `Assembler.cs` - Added `Nop()` method for memory randomization
-- `MainWindowViewModel.cs` - Added `UseStealthMode` property and stealth configuration
-- `MainWindow.xaml` - Added stealth mode checkbox with modern styling
+---
 
-**New Classes:**
-- `InjectionOptions` - Configuration class for stealth features with boolean flags for each feature
+## 🥷 Stealth Injection System (Introduced in v2.5)
 
-### 📊 Performance Impact
+### Enable Stealth Mode Checkbox
 
-| Mode | Injection Time | Detection Risk |
-|------|---------------|----------------|
-| Normal | ~50-100ms | Higher |
-| Stealth | ~250-350ms | Significantly Lower |
+* One-click toggle for all stealth features
+* Visual indicator in the status bar
+* Displays: `Injection successful (STEALTH MODE)` upon completion
 
-Worth the extra 200ms for stealth operations!
+### Stealth Features
 
-## What's New in TheHolyOneZ Edition (Design) v2.5
+1. **Memory Randomization**
+   Inserts 4–64 random NOP instructions before shellcode execution.
+   Prevents signature-based detection and ensures each injection is unique.
 
-### 🎨 Design Enhancements
+2. **Thread Hiding**
+   Threads are created with `CREATE_SUSPENDED` and hidden using `NtSetInformationThread`,
+   then safely resumed to evade enumeration and scanning tools.
 
-- **Modern Dark Theme**: Sleek dark interface with vibrant `#00E676` green accents for a professional hacker/developer aesthetic
-- **Rounded Corners**: All UI elements feature subtle rounded corners (4-8px) for a contemporary look
-- **Premium Typography**: Segoe UI font family throughout with proper weights and sizing hierarchy
-- **Smooth Interactions**: All interactive elements include polished hover states and transitions
-- **Optimized Layout**: Improved spacing, padding, and visual hierarchy across the entire interface
+3. **Execution Delay**
+   Adds a 150ms randomized delay before injection begins, reducing behavioral detection patterns.
 
-### 🔧 Fixed Issues (v2.5)
+4. **Debugger Detection**
+   Detects if a debugger is attached to the target process and displays a warning.
 
-- **Scrollbar Styling**: Custom-styled scrollbars with green theme that match the overall design
-- **Overflow Protection**: Fixed injected assemblies overflow with proper ScrollViewer implementation and fixed 120px height
-- **Button Sizing**: Increased button sizes (MinWidth: 90px) for better usability and touch-friendly interactions
-- **Scrollbar Overlap**: Eliminated scrollbar overlap with content through proper margin management
-- **Content Scrolling**: Added ScrollViewers to both main sections for graceful overflow handling
+5. **Code Obfuscation** *(Experimental - Disabled by default)*
+   Encrypts shellcode with XOR and dynamically generates a decoder stub at runtime.
 
-### ⚡ Technical Improvements (v2.5)
-
-- **Updated Framework**: Upgraded from .NET Framework 4.0 to 4.8 for improved performance and modern compatibility
-
-### ✨ Key Visual Features
+---
 
 
-#### Card-Based Layout
-- Both Inject and Eject sections housed in elevated card-style containers
-- `#FF1E1E1E` background with `8px` rounded corners
-- Clear visual separation between functional areas
+## 🎨 Visual & UX Improvements (Inherited + Enhanced)
 
-#### Modern Button Styles
-- **Primary Actions** (INJECT/EJECT): Solid green background with black text
-- **Secondary Actions** (Refresh/Browse): Outlined style that fills green on hover
-- All buttons feature smooth color transitions and hand cursor
+### From v2.5: Dark Theme & Layout Enhancements
 
-#### Enhanced Input Fields
-- Dark themed text boxes and combo boxes (`#FF252525`)
-- Green border highlights on hover and focus states
-- Consistent padding and rounded corners across all inputs
+* **Dark Interface:** Deep black and gray tones with neon-green (`#00E676`) accents
+* **Rounded Corners:** Subtle 4–8px rounding for all buttons, inputs, and containers
+* **Card-Based UI:** Inject/Eject/Logs/Profiles sections organized in raised cards (`#FF1E1E1E` background)
+* **Smooth Animations:** Hover transitions, click feedback, and fading indicators
+* **Premium Typography:** Segoe UI font for modern legibility
 
-#### Status Bar
-- Sleek black footer with real-time status updates
-- Custom "Design by TheHolyOneZ" signature with clickable GitHub link
-- Clean typography and proper text trimming for long messages
+### From v2.6: Extended Usability
 
-#### List Improvements
-- Styled ListBox with custom scrollbars
-- Selected items display with full green background and black text for optimal contrast
-- Hover states on list items for better user feedback
+* Resizable panels for log viewer and profile list
+* Scroll synchronization across panels
+* Improved scrollbar styling with consistent green theme
+* Persistent window size and layout memory between sessions
 
-## About SharpMonoInjector
+---
 
-SharpMonoInjector is a tool for injecting assemblies into Mono embedded applications, commonly Unity Engine based games. The target process *usually* does not have to be restarted in order to inject an updated version of the assembly. Your unload method must destroy all of its resources (such as game objects).
-
-SharpMonoInjector works by dynamically generating machine code, writing it to the target process and executing it using CreateRemoteThread. The code calls functions in the mono embedded API. The return value is obtained with ReadProcessMemory.
-
-**Both x86 and x64 processes are supported.**
-
-## Usage Requirements
+## 💾 Usage Guide
 
 ### Method Signature
-In order for the injector to work, the load/unload methods need to match the following signature:
 
 ```csharp
 static void Method()
 ```
 
-Note: Unload method is optional but recommended for clean resource cleanup.
+Both **load** and **unload** methods should follow this signature. The unload method is optional but recommended for clean resource management.
 
-### Stealth Mode Usage
+### How to Inject
+
 1. Select your target Mono process from the dropdown
 2. Browse and select your DLL assembly
-3. Fill in Namespace, Class name, and Method name
-4. **Check "Enable Stealth Mode"** for anti-detection features
-5. Click INJECT
-6. Status bar will show "(STEALTH MODE)" if successful
+3. Enter Namespace, Class, and Method
+4. Optionally enable **Stealth Mode**
+5. Click **INJECT**
+6. Watch the **Log Viewer** for injection results
+
+When stealth is active, the status bar will display:
+
+```
+Injection successful (STEALTH MODE)
+```
 
 ### Administrator Privileges
-The GUI version will automatically request and restart with Administrator privileges when needed. For the console version, you'll receive a warning with instructions if privileges are insufficient.
 
-## Anti-Detection Capabilities
-
-When **Stealth Mode** is enabled:
-
-✅ **Evades Static Signatures** - Random NOP padding breaks signature patterns  
-✅ **Evades Memory Scanners** - Randomized shellcode layout per injection  
-✅ **Evades Thread Enumeration** - Hidden threads via `NtSetInformationThread`  
-✅ **Evades Timing Analysis** - Execution delay disrupts time-based detection  
-✅ **Debugger Awareness** - Warns when target has active debugger
-
-### Recommended Use Cases for Stealth Mode
-- Games with anti-cheat systems
-- Applications with integrity monitoring
-- Processes with active security scanning
-- Any environment requiring low-profile injection
-
-## Features from wh0am1 Mod
-
-This edition builds upon the wh0am1 mod which fixed:
-- Process detection bugs
-- x86/x64 detection issues
-- Added privilege checking and auto-elevation
-- Enhanced error handling
-- Built on .NET 4.0 for Windows 7+ compatibility
-
-## Version History
-
-### v2.5 (TheHolyOneZ Edition)
-- Added complete stealth injection system
-- Fixed ComboBox process display bug
-- Fixed thread freezing in stealth mode
-- Added debugger detection
-- Enhanced anti-detection capabilities
-
-- Complete visual overhaul with modern dark theme
-- Custom styled scrollbars and UI components
-- Upgraded to .NET Framework 4.8
-- Improved layout and UX
-
-### Original Versions
-- wh0am1 mod improvements
-- Warbler's original implementation
-
-## Credits
-
-- **TheHolyOneZ** - Visual overhaul, UI/UX improvements, and stealth injection system
-- **wh0am1** - Bug fixes and stability improvements ([Original Mod](https://www.unknowncheats.me/forum/unity/408878-sharpmonoinjector-fixed-updated.html))
-- **Warbler** - Original SharpMonoInjector creator ([Original Project](https://github.com/warbler/SharpMonoInjector))
-
-
-The developers are not responsible for misuse of this software.
-
-## Disclaimer (Cough Cough)
-
-This tool is for educational and legitimate testing purposes only. The stealth features are designed for:
-- Legitimate mod development and testing
-- Security research in controlled environments
-- Personal single-player game modifications
-
-**Do not use this tool to:**
-- Cheat in online multiplayer games
-- Bypass security in production applications
-- Violate any terms of service or end-user agreements
-- Engage in any illegal or unethical activities
-
-## License
-
-This project maintains the same license as the original SharpMonoInjector project.
+* The GUI automatically requests elevation when needed.
+* If denied, a prompt explains manual restart requirements.
 
 ---
 
-**Design/Modifications by [TheHolyOneZ](https://github.com/TheHolyOneZ)**
+## ⚙️ Performance Impact
 
-*README Crafted with assistance from Claude (Anthropic)*
+| Mode    | Injection Time | Detection Risk      |
+| ------- | -------------- | ------------------- |
+| Normal  | ~50–100ms      | Higher              |
+| Stealth | ~250–350ms     | Significantly Lower |
+
+> **Worth the extra 200ms for enhanced stealth.**
+
+---
+
+## 🧩 Logging System (v2.6)
+![SharpMonoInjector GUI](Images/LogViewer.png)
+
+### Log Levels
+
+| Level       | Color  | Description                                   |
+| ----------- | ------ | --------------------------------------------- |
+| **Info**    | Blue   | Routine actions, refreshes, and general info  |
+| **Success** | Green  | Successful injections/ejections               |
+| **Warning** | Orange | Debugger detected or minor recoverable issues |
+| **Error**   | Red    | Injection or process-related failures         |
+
+### What Gets Logged
+
+* Process refresh events
+* Detection and enumeration results
+* Injection/ejection start and completion
+* Warnings and stealth alerts
+* Profile load/save actions
+* Process monitor detections
+
+---
+
+## 🗂️ Profile Management (v2.6)
+
+### Features
+
+* Create new profiles or save current injector configuration
+* Rename, duplicate, or delete profiles
+* Automatically load last used profile on startup
+* Organized by process name or custom label
+
+### How to Use
+
+1. Configure your desired injection settings
+2. Click **Save Profile** and name it
+3. Later, click **Load Profile** to restore instantly
+4. Rename or delete as needed
+
+---
+
+## 🔍 Process Monitor (v2.6)
+
+### Overview
+
+Allows SharpMonoInjector to automatically inject when a target process starts.
+![SharpMonoInjector GUI](Images/ProcessMonitor.png)
+
+### How to Use
+
+1. Add a process to the watch list
+2. Choose between **Current Settings** or **Saved Profile**
+3. Start Monitoring
+4. Injection executes automatically when detected
+
+Includes optional filters to show only Mono or Unity-based processes.
+
+---
+
+## 📊 Anti-Detection Capabilities
+
+When **Stealth Mode** is active:
+
+✅ Evades Static Signatures – Random NOP padding breaks consistent patterns
+✅ Evades Memory Scanners – Randomized shellcode layout
+✅ Evades Thread Enumeration – Threads hidden via `NtSetInformationThread`
+✅ Evades Timing Analysis – Randomized execution delays
+✅ Debugger Awareness – Warns if target process has active debugger
+
+### Recommended Use Cases
+
+* Game modding in offline or single-player environments
+* Software security research
+* Dynamic code injection testing in controlled systems
+
+---
+
+## 🧾 Version History
+
+### v2.6 (TheHolyOneZ Edition)
+
+* Added real-time log system with color-coded viewer and export
+* Introduced profile management (save/load/rename/delete)
+* Added process monitor for automated injections
+* Extended stealth injection logging
+* Improved UI scaling and performance
+* Minor bug fixes and code cleanup
+
+### v2.5 (TheHolyOneZ Edition)
+
+* Implemented stealth injection system (memory randomization, thread hiding, etc.)
+* Fixed ComboBox process display bug
+* Added debugger detection and better thread lifecycle management
+* Major dark theme UI overhaul and layout improvements
+* Updated to .NET Framework 4.8
+
+### Earlier Versions
+
+* wh0am1 Mod: Fixed x86/x64 detection, process bugs, and privilege handling
+* Warbler Original: Initial Mono injection implementation
+
+---
+
+## 👥 Credits
+
+* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, and automation
+* **wh0am1** – Bug fixes and original modernization ([UnknownCheats Thread](https://www.unknowncheats.me/forum/unity/408878-sharpmonoinjector-fixed-updated.html))
+* **Warbler** – Original SharpMonoInjector creator ([GitHub](https://github.com/warbler/SharpMonoInjector))
+
+---
+
+## ⚠️ Disclaimer
+
+**This software is intended for educational and legitimate testing purposes only.**
+It is **not** to be used for cheating, bypassing anti-cheat systems, or unauthorized software modification.
+
+Allowed use cases:
+
+* Game mod development in personal or research contexts
+* Security testing and controlled vulnerability research
+* Reverse engineering for learning purposes
+
+Prohibited use cases:
+
+* Multiplayer cheating
+* Commercial software exploitation
+* Illegal or unethical activities
+
+---
+
+## 📜 License
+
+This project retains the same license as the original **SharpMonoInjector** by Warbler.
+
+---
+
+
+Report Bugs Here: 
+
+
+
+**Design, modernization, and enhancements by [TheHolyOneZ](https://github.com/TheHolyOneZ)**
+*README enhanced with GPT-5 assistance for structured clarity and extended documentation.*

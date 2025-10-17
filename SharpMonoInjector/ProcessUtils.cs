@@ -36,7 +36,7 @@ namespace SharpMonoInjector
 
                 for (int i = 0; i < count; i++)
                 {
-                    try // Added 8-7-2021 J.E
+                    try
                     {
                         int offset = memory.ReadInt(names + i * 4);
                         string name = memory.ReadString(mod + offset, 32, Encoding.ASCII);
@@ -55,50 +55,64 @@ namespace SharpMonoInjector
 
         public static bool GetMonoModule(IntPtr handle, out IntPtr monoModule)
         {
-            int size = Is64BitProcess(handle) ? 8 : 4;
+            monoModule = IntPtr.Zero;
 
-            IntPtr[] ptrs = new IntPtr[0];
-
-            if (!Native.EnumProcessModulesEx(handle, ptrs, 0, out int bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
+            try
             {
-                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
-            }
+                int size = Is64BitProcess(handle) ? 8 : 4;
+                IntPtr[] ptrs = new IntPtr[0];
 
-            int count = bytesNeeded / size;
-            ptrs = new IntPtr[count];
-
-            if (!Native.EnumProcessModulesEx(handle, ptrs, bytesNeeded, out bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
-            {
-                throw new InjectorException("Failed to enumerate process modules", new Win32Exception(Marshal.GetLastWin32Error()));
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                try
+                if (!Native.EnumProcessModulesEx(handle, ptrs, 0, out int bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
                 {
-                    StringBuilder path = new StringBuilder(260);
-                    Native.GetModuleFileNameEx(handle, ptrs[i], path, 260);
+                    // This can fail on protected processes, just return false
+                    return false;
+                }
 
-                    if (path.ToString().IndexOf("mono", StringComparison.OrdinalIgnoreCase) > -1)
+                int count = bytesNeeded / size;
+                ptrs = new IntPtr[count];
+
+                if (!Native.EnumProcessModulesEx(handle, ptrs, bytesNeeded, out bytesNeeded, ModuleFilter.LIST_MODULES_ALL))
+                {
+                    // This can also fail, just return false
+                    return false;
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    try
                     {
-                        if (!Native.GetModuleInformation(handle, ptrs[i], out MODULEINFO info, (uint)(size * ptrs.Length)))
-                        {
-                            throw new InjectorException("Failed to get module information", new Win32Exception(Marshal.GetLastWin32Error()));
-                        }
+                        StringBuilder path = new StringBuilder(260);
+                        Native.GetModuleFileNameEx(handle, ptrs[i], path, 260);
 
-                        var funcs = GetExportedFunctions(handle, info.lpBaseOfDll);
-
-                        if (funcs.Any(f => f.Name == "mono_get_root_domain"))
+                        if (path.ToString().IndexOf("mono", StringComparison.OrdinalIgnoreCase) > -1)
                         {
-                            monoModule = info.lpBaseOfDll;
-                            return true;
+                            if (!Native.GetModuleInformation(handle, ptrs[i], out MODULEINFO info, (uint)(size * ptrs.Length)))
+                            {
+                                // Log failure but continue loop
+                                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[ProcessUtils] GetMono (GetModuleInformation) - ERROR: " + new Win32Exception(Marshal.GetLastWin32Error()).Message + "\r\n");
+                                continue;
+                            }
+
+                            var funcs = GetExportedFunctions(handle, info.lpBaseOfDll);
+
+                            if (funcs.Any(f => f.Name == "mono_get_root_domain"))
+                            {
+                                monoModule = info.lpBaseOfDll;
+                                return true;
+                            }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[ProcessUtils] GetMono (Inner Loop) - ERROR: " + ex.Message + "\r\n");
+                    }
                 }
-                catch (Exception ex) { File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[ProcessUtils] GetMono - ERROR: " + ex.Message + "\r\n"); }
             }
-
-            monoModule = IntPtr.Zero;
+            catch (Exception ex)
+            {
+                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[ProcessUtils] GetMono (Outer) - ERROR: " + ex.Message + "\r\n");
+            }
+            
             return false;
         }
 
@@ -109,9 +123,8 @@ namespace SharpMonoInjector
                 if (!Environment.Is64BitOperatingSystem) { return false; }
 
                 string OSVer = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion", "ProductName", null);
-                Console.WriteLine(OSVer);
-
-                if(OSVer.Contains("Windows 10"))
+                
+                if(OSVer != null && OSVer.Contains("Windows 10"))
                 {
                     #region[Win10]
             
@@ -124,22 +137,18 @@ namespace SharpMonoInjector
 
                         try
                         {
-                            if (!IsWow64Process2(handle, out pMachine, out nMachine))
+                            if (IsWow64Process2(handle, out pMachine, out nMachine))
                             {
-                                //handle error
+                                if (pMachine == 332)
+                                {
+                                    isTargetx64 = false;
+                                }
+                                else
+                                {
+                                    isTargetx64 = true;
+                                }
+                                return isTargetx64;
                             }
-
-                            if (pMachine == 332)
-                            {
-                                isTargetx64 = false;
-                            }
-                            else
-                            {
-                                isTargetx64 = true;
-
-                            }
-
-                            return isTargetx64;
                         }
                         catch { /* Will try the Win7 method */ }
                     }
@@ -147,30 +156,19 @@ namespace SharpMonoInjector
                     #endregion
                 }
 
-                #region[Win7]
+                #region[Win7 and fallback]
 
-                IsWow64Process(handle, out bool isTargetWOWx64);
-
-                if (isTargetWOWx64)
+                if (IsWow64Process(handle, out bool isTargetWOWx64))
                 {
-                    return false; // It is WOW64 so it's a 32-bit process
-                }
-                else 
-                {
-                    return true; // It's not a WOW64 process so 64-bit process, and we already check if OS is 32 or 64 bit.
+                    return !isTargetWOWx64;
                 }
 
                 #endregion
-
-
-                //ORIG
-                //if (!IsWow64Process(handle, out bool is64bit))
-                //{
-                //    return IntPtr.Size == 8; // assume it's the same as the current process */ 
-                //}
             }
             catch (Exception ex) { File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[ProcessUtils] is64Bit - ERROR: " + ex.Message + "\r\n"); }
-            return true;
+            
+            // Fallback for cases where checks fail
+            return IntPtr.Size == 8;
         }
     }
 }

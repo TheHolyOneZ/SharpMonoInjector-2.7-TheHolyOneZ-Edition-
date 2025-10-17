@@ -9,6 +9,10 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         private readonly Action<object> _execute;
 
+
+        public RelayCommand ToggleMonitorVisibilityCommand { get; }
+
+        public RelayCommand OpenProcessMonitorCommand { get; }
         private readonly Func<object, bool> _canExecute;
 
         public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)

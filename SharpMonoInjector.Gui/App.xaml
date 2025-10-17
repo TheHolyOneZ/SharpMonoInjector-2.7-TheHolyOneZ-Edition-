@@ -4,19 +4,10 @@
              xmlns:local="clr-namespace:SharpMonoInjector.Gui"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-        <!-- Modern Color Palette -->
-        <SolidColorBrush x:Key="PrimaryBackground" Color="#FF1A1A1A"/>
-        <SolidColorBrush x:Key="SecondaryBackground" Color="#FF252525"/>
-        <SolidColorBrush x:Key="TertiaryBackground" Color="#FF2F2F2F"/>
-        <SolidColorBrush x:Key="AccentGreen" Color="#FF00E676"/>
-        <SolidColorBrush x:Key="AccentGreenDark" Color="#FF00C853"/>
-        <SolidColorBrush x:Key="AccentBlue" Color="#FF00B0FF"/>
-        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
-        <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0B0"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#FF3A3A3A"/>
-        <SolidColorBrush x:Key="HoverColor" Color="#FF353535"/>
-        
-        <!-- Modern Font -->
-        <FontFamily x:Key="ModernFont">Segoe UI</FontFamily>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/smi_gui;component/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

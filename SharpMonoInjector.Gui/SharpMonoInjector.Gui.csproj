@@ -41,6 +41,7 @@
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -64,24 +65,62 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LogViewerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ProcessMonitorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SelectProfileWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\InjectedAssemblyToStringConverter.cs" />
+    <Compile Include="Converters\InverseBooleanConverter.cs" />
+    <Compile Include="Converters\LogLevelToColorConverter.cs" />
     <Compile Include="Converters\MonoProcessToStringConverter.cs" />
+    <Compile Include="Models\AppSettings.cs" />
     <Compile Include="Models\InjectedAssembly.cs" />
+    <Compile Include="Models\InjectionProfile.cs" />
+    <Compile Include="Models\LogEntry.cs" />
     <Compile Include="Models\MonoProcess.cs" />
+    <Compile Include="Models\ProcessMonitorSettings.cs" />
+    <Compile Include="Models\WatchedProcess.cs" />
+    <Compile Include="Services\ConfigurationService.cs" />
+    <Compile Include="Services\LoggingService.cs" />
+    <Compile Include="Services\ProcessMonitorService.cs" />
+    <Compile Include="ViewModels\LogViewerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="ViewModels\SelectProfileViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
+    <Compile Include="Views\LogViewerWindow.xaml.cs">
+      <DependentUpon>LogViewerWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\ProcessMonitorWindow.xaml.cs">
+      <DependentUpon>ProcessMonitorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SelectProfileWindow.xaml.cs">
+      <DependentUpon>SelectProfileWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
