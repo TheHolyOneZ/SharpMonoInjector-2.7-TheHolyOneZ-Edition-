@@ -1,8 +1,8 @@
-# SharpMonoInjector TheHolyOneZ Edition v2.6
+# SharpMonoInjector TheHolyOneZ Edition v2.7
 
-A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, and a **beautiful dark UI** designed for both power users and security researchers.
+A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, **Thunderstore and r2modman auto-detection**, and **smart injection routing** for both **standard BepInEx** and **mod manager environments**.
 
-This version builds upon **v2.5 TheHolyOneZ Edition**, retaining the complete **visual overhaul**, **stealth injection system**, and **performance optimizations**, while introducing new **automation tools**, **real-time insights**, and **workflow efficiency** features.
+This release builds on **v2.6**, introducing the new **Smart Injection Router**, **Receiver Auto-Detection**, and **Thunderstore integration**, making SharpMonoInjector easier to use than ever before.
 
 ![SharpMonoInjector GUI](Images/AllWindows.png)
 
@@ -10,273 +10,207 @@ This version builds upon **v2.5 TheHolyOneZ Edition**, retaining the complete **
 
 ## 🧭 Overview
 
-**SharpMonoInjector** allows injecting managed assemblies into Mono-embedded applications (most commonly Unity Engine based games). Unlike traditional injectors, the target process *does not need to restart* after updating your assembly — ideal for debugging or runtime modding.
+**SharpMonoInjector** allows safe injection of managed assemblies into Mono-embedded applications (commonly Unity Engine games) without restarting the target process. This is ideal for runtime modding, plugin debugging, or live patching.
 
-Both **x86** and **x64** architectures are supported.
-
----
-
-## 🆕 What's New in v2.6 (Latest Release)
-
-### 🚀 Major Additions
-
-#### 🖤 Real-Time Logging (NEW)
-
-* Live log viewer integrated directly into the GUI
-* Color-coded by level: Info, Success, Warning, Error
-* Search and filter logs instantly
-* Export logs to `.txt` or `.log`
-* Clear logs with one click
-* Logs also saved to `DebugLog.txt` for persistence
-
-#### 🧩 Profile Management (NEW)
-
-* Save, load, rename, and delete multiple injection profiles per game
-* Profiles store process name, assembly path, namespace, class, method, and stealth mode preference
-* Load profiles instantly to auto-fill all injector fields
-* Convenient rename ✏️ and delete ✕ icons next to profiles
-
-#### 🔍 Process Monitor (NEW)
-
-* Watch processes automatically and trigger injections when targets appear
-* Assign profiles to specific processes for full automation
-* Filter for Mono/Unity-based games only
-* Supports background monitoring with configurable polling interval
+Now fully compatible with **BepInEx**, **Thunderstore Mod Manager**, and **r2modman** setups.
 
 ---
 
-## 🥷 Stealth Injection System (Introduced in v2.5)
+## 🆕 What's New in v2.7 (Latest Release)
 
-### Enable Stealth Mode Checkbox
+### ⚙️ Smart Injection Router (NEW)
 
-* One-click toggle for all stealth features
-* Visual indicator in the status bar
-* Displays: `Injection successful (STEALTH MODE)` upon completion
+Automatically detects where BepInEx or Thunderstore profiles are located and injects accordingly — no manual path setup needed.
 
-### Stealth Features
+**Detection Priority:**
 
-1. **Memory Randomization**
-   Inserts 4–64 random NOP instructions before shellcode execution.
-   Prevents signature-based detection and ensures each injection is unique.
+1. Standard BepInEx in game directory
+2. Thunderstore profile under `%AppData%\\Thunderstore Mod Manager`
+3. r2modman profile under `%AppData%\\r2modman`
 
-2. **Thread Hiding**
-   Threads are created with `CREATE_SUSPENDED` and hidden using `NtSetInformationThread`,
-   then safely resumed to evade enumeration and scanning tools.
+**Status Messages:**
 
-3. **Execution Delay**
-   Adds a 150ms randomized delay before injection begins, reducing behavioral detection patterns.
+* `Injecting via BepInEx Receiver...` → Standard setup detected ✅
+* `Injecting via Thunderstore BepInEx...` → Thunderstore/r2modman detected ✅
+* `BepInEx detected! Receiver plugin required.` → Receiver missing ⚠️
 
-4. **Debugger Detection**
-   Detects if a debugger is attached to the target process and displays a warning.
+### 🧩 Receiver Auto-Detection
 
-5. **Code Obfuscation** *(Experimental - Disabled by default)*
-   Encrypts shellcode with XOR and dynamically generates a decoder stub at runtime.
-
----
-
-
-## 🎨 Visual & UX Improvements (Inherited + Enhanced)
-
-### From v2.5: Dark Theme & Layout Enhancements
-
-* **Dark Interface:** Deep black and gray tones with neon-green (`#00E676`) accents
-* **Rounded Corners:** Subtle 4–8px rounding for all buttons, inputs, and containers
-* **Card-Based UI:** Inject/Eject/Logs/Profiles sections organized in raised cards (`#FF1E1E1E` background)
-* **Smooth Animations:** Hover transitions, click feedback, and fading indicators
-* **Premium Typography:** Segoe UI font for modern legibility
-
-### From v2.6: Extended Usability
-
-* Resizable panels for log viewer and profile list
-* Scroll synchronization across panels
-* Improved scrollbar styling with consistent green theme
-* Persistent window size and layout memory between sessions
-
----
-
-## 💾 Usage Guide
-
-### Method Signature
-
-```csharp
-static void Method()
-```
-
-Both **load** and **unload** methods should follow this signature. The unload method is optional but recommended for clean resource management.
-
-### How to Inject
-
-1. Select your target Mono process from the dropdown
-2. Browse and select your DLL assembly
-3. Enter Namespace, Class, and Method
-4. Optionally enable **Stealth Mode**
-5. Click **INJECT**
-6. Watch the **Log Viewer** for injection results
-
-When stealth is active, the status bar will display:
+The injector automatically looks for `SharpMonoInjectorTheHolyOneZEdition.dll` under any of these valid plugin locations:
 
 ```
-Injection successful (STEALTH MODE)
+GameFolder\\BepInEx\\plugins\\
+AppData\\Roaming\\Thunderstore Mod Manager\\DataFolder\\<GameName>\\profiles\\Default\\BepInEx\\plugins\\
+AppData\\Roaming\\r2modman\\profiles\\<GameName>\\BepInEx\\plugins\\
 ```
 
-### Administrator Privileges
+No need for manual file placement — the router finds it automatically.
 
-* The GUI automatically requests elevation when needed.
-* If denied, a prompt explains manual restart requirements.
+### 💉 Safe Double Injection (Improved)
 
----
+The Receiver now performs an internal two-phase injection to prevent Unity/Photon crashes and ensure stable DLL loading. Logs clearly indicate both passes.
 
-## ⚙️ Performance Impact
+### 🪄 Quality of Life
 
-| Mode    | Injection Time | Detection Risk      |
-| ------- | -------------- | ------------------- |
-| Normal  | ~50–100ms      | Higher              |
-| Stealth | ~250–350ms     | Significantly Lower |
-
-> **Worth the extra 200ms for enhanced stealth.**
+* Smart Router remembers last successful injection path per game.
+* Added **Receiver Ping Test** button to verify communication before injection.
+* Enhanced error recovery when receiver pipe isn’t found.
+* Rewritten detection logic for Thunderstore profiles (now scans correctly under AppData).
 
 ---
 
-## 🧩 Logging System (v2.6)
-![SharpMonoInjector GUI](Images/LogViewer.png)
+## 🔌 SharpMonoInjector Receiver Plugin v2.7
 
-### Log Levels
+A companion **BepInEx plugin** that safely receives injections from SharpMonoInjector and handles them internally via named pipes.
 
-| Level       | Color  | Description                                   |
-| ----------- | ------ | --------------------------------------------- |
-| **Info**    | Blue   | Routine actions, refreshes, and general info  |
-| **Success** | Green  | Successful injections/ejections               |
-| **Warning** | Orange | Debugger detected or minor recoverable issues |
-| **Error**   | Red    | Injection or process-related failures         |
+### 📦 Installation
 
-### What Gets Logged
+#### **If Using Thunderstore or r2modman (Recommended)**
 
-* Process refresh events
-* Detection and enumeration results
-* Injection/ejection start and completion
-* Warnings and stealth alerts
-* Profile load/save actions
-* Process monitor detections
+Simply drag the receiver DLL here:
 
----
+```
+AppData\\Roaming\\Thunderstore Mod Manager\\DataFolder\\<GameName>\\profiles\\Default\\BepInEx\\plugins\\SharpMonoInjectorTheHolyOneZEdition.dll
+```
 
-## 🗂️ Profile Management (v2.6)
+> Works even if not in a subfolder – BepInEx still loads it automatically.
 
-### Features
+#### **If Using Standard BepInEx Installation**
 
-* Create new profiles or save current injector configuration
-* Rename, duplicate, or delete profiles
-* Automatically load last used profile on startup
-* Organized by process name or custom label
-
-### How to Use
-
-1. Configure your desired injection settings
-2. Click **Save Profile** and name it
-3. Later, click **Load Profile** to restore instantly
-4. Rename or delete as needed
+```
+YourGameFolder\\BepInEx\\plugins\\SharpMonoInjectorTheHolyOneZEdition.dll
+```
 
 ---
 
-## 🔍 Process Monitor (v2.6)
+### 🔧 How It Works
 
-### Overview
+**Communication:** Named Pipe → `SharpMonoInjectorPipe_THOZE`
 
-Allows SharpMonoInjector to automatically inject when a target process starts.
-![SharpMonoInjector GUI](Images/ProcessMonitor.png)
+**What It Does:**
 
-### How to Use
+1. Waits for injection requests from SharpMonoInjector.
+2. Blocks problematic components (like PhotonView) that crash on injection.
+3. Safely loads DLLs in a BepInEx-compatible way.
+4. Performs automatic double-injection to ensure success.
 
-1. Add a process to the watch list
-2. Choose between **Current Settings** or **Saved Profile**
-3. Start Monitoring
-4. Injection executes automatically when detected
+**Logs:**
 
-Includes optional filters to show only Mono or Unity-based processes.
+* `GameFolder/SmiReceiverLog.txt` – Injection receiver logs
+* `BepInEx/LogOutput.log` – BepInEx system logs
 
 ---
 
-## 📊 Anti-Detection Capabilities
+## 🖥️ Usage
 
-When **Stealth Mode** is active:
+1. Open **SharpMonoInjector v2.7 TheHolyOneZ Edition**.
+2. Select your target game process.
+3. Choose your DLL, namespace, class, and method.
+4. Click **Inject** once.
+5. Watch the log — router selects the right injection path automatically.
 
-✅ Evades Static Signatures – Random NOP padding breaks consistent patterns
-✅ Evades Memory Scanners – Randomized shellcode layout
-✅ Evades Thread Enumeration – Threads hidden via `NtSetInformationThread`
-✅ Evades Timing Analysis – Randomized execution delays
-✅ Debugger Awareness – Warns if target process has active debugger
+**Successful Status Example:**
 
-### Recommended Use Cases
+```
+[SmartRouter] Thunderstore BepInEx detected
+[Pipe] Connected successfully
+[Double Injection Complete]
+```
 
-* Game modding in offline or single-player environments
-* Software security research
-* Dynamic code injection testing in controlled systems
+---
+
+## 🧠 Troubleshooting
+
+### "Connection timed out"
+
+* Ensure the game is running.
+* Check the Receiver plugin is installed in one of the listed plugin paths.
+* Restart the game.
+
+### "Receiver not found"
+
+* Plugin is missing or placed in the wrong BepInEx profile.
+* Verify both BepInEx and the Receiver loaded successfully in `LogOutput.log`.
+
+### "BepInEx detected! Receiver plugin required."
+
+* BepInEx found, but receiver not loaded.
+* Install the DLL to the `BepInEx/plugins/` directory for your environment.
+
+### Still Crashes?
+
+* Check `SmiReceiverLog.txt` and `LogOutput.log`.
+* Look for these success indicators:
+
+  * `[BLOCKED] PhotonView` → protection active ✅
+  * `Double injection complete!` → success ✅
+
+---
+
+## 📊 Technical Summary
+
+| Component             | Description                                   |
+| --------------------- | --------------------------------------------- |
+| **Receiver**          | BepInEx plugin that handles injections safely |
+| **Injector**          | SharpMonoInjector v2.7 GUI/CLI tool           |
+| **Pipe Name**         | `SharpMonoInjectorPipe_THOZE`                 |
+| **Supported Loaders** | BepInEx, Thunderstore, r2modman               |
+| **Log Files**         | `SmiReceiverLog.txt`, `DebugLog.txt`          |
+
+---
+
+## 🧩 Compatibility
+
+✅ **BepInEx:** 5.4.x and higher
+✅ **Thunderstore:** Full support (AppData-based profiles)
+✅ **r2modman:** Fully supported (auto-detected paths)
+✅ **Mono/Unity Games:** Compatible with all standard Unity/Mono titles
 
 ---
 
 ## 🧾 Version History
 
-### v2.6 (TheHolyOneZ Edition)
+### v2.7 (Smart Router Edition)
 
-* Added real-time log system with color-coded viewer and export
-* Introduced profile management (save/load/rename/delete)
-* Added process monitor for automated injections
-* Extended stealth injection logging
-* Improved UI scaling and performance
-* Minor bug fixes and code cleanup
+* ✨ Added Smart Injection Router (auto-detects BepInEx/Thunderstore/r2modman)
+* ✨ Added Receiver auto-location and ping verification
+* 🧠 Improved double-injection stability
+* 🪄 Enhanced Thunderstore path scanning
+* 🧰 Added receiver test utilities and fallback recovery
+* 🐛 Fixed rare pipe timeout issues
 
-### v2.5 (TheHolyOneZ Edition)
+### v2.6
 
-* Implemented stealth injection system (memory randomization, thread hiding, etc.)
-* Fixed ComboBox process display bug
-* Added debugger detection and better thread lifecycle management
-* Major dark theme UI overhaul and layout improvements
-* Updated to .NET Framework 4.8
+* Added real-time log viewer and process monitor
+* Introduced profile management
+* Improved stealth injection system and UI persistence
 
-### Earlier Versions
+### v2.5
 
-* wh0am1 Mod: Fixed x86/x64 detection, process bugs, and privilege handling
-* Warbler Original: Initial Mono injection implementation
+* Introduced Stealth Injection with thread hiding and randomization
+* Dark theme visual overhaul
 
 ---
 
 ## 👥 Credits
 
-* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, and automation
-* **wh0am1** – Bug fixes and original modernization ([UnknownCheats Thread](https://www.unknowncheats.me/forum/unity/408878-sharpmonoinjector-fixed-updated.html))
-* **Warbler** – Original SharpMonoInjector creator ([GitHub](https://github.com/warbler/SharpMonoInjector))
+**Developed by:** TheHolyOneZ
+**Enhanced and documented with:** GPT-5
+
+**Special Thanks:**
+
+* BepInEx Team – For the base framework
+* Thunderstore & r2modman developers – For community mod tools
+* Warbler & wh0am1 – Original SharpMonoInjector creators
 
 ---
 
 ## ⚠️ Disclaimer
 
-**This software is intended for educational and legitimate testing purposes only.**
-It is **not** to be used for cheating, bypassing anti-cheat systems, or unauthorized software modification.
-
-Allowed use cases:
-
-* Game mod development in personal or research contexts
-* Security testing and controlled vulnerability research
-* Reverse engineering for learning purposes
-
-Prohibited use cases:
-
-* Multiplayer cheating
-* Commercial software exploitation
-* Illegal or unethical activities
+This software is intended for **educational and legitimate modding or research purposes only.**
+Unauthorized use (e.g., cheating, exploiting multiplayer titles) is **strictly prohibited.**
 
 ---
-
-## 📜 License
-
-This project retains the same license as the original **SharpMonoInjector** by Warbler.
-
----
-
-
-Report Bugs Here: 
-
-
 
 **Design, modernization, and enhancements by [TheHolyOneZ](https://github.com/TheHolyOneZ)**
-*README enhanced with GPT-5 assistance for structured clarity and extended documentation.*
+*Documentation enhanced with GPT-5 for clarity and technical precision.*
