@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -15,11 +16,29 @@ using System.Linq;
 using Microsoft.VisualBasic;
 using SharpMonoInjector.Gui.Views;
 
-
 namespace SharpMonoInjector.Gui.ViewModels
 {
+    public enum BepInExType
+    {
+        Standard,
+        ModManager,
+        None
+    }
+
+    public class BepInExLocation
+    {
+        public BepInExType Type { get; set; }
+        public string Path { get; set; }
+        public bool HasReceiver { get; set; }
+        public string ReceiverPath { get; set; }
+    }
+
     public class MainWindowViewModel : ViewModel
     {
+        private const string PIPE_NAME = "SharpMonoInjectorPipe_THOZE";
+        private const string RECEIVER_DLL_NAME = "SharpMonoInjectorTheHolyOneZEdition.dll";
+        private const string DISCORD_LINK = "discord.gg/Wp9Mf4YfTS";
+
         private readonly ConfigurationService _configService;
         private readonly LoggingService _loggingService;
         private readonly ProcessMonitorService _monitorService;
@@ -242,7 +261,6 @@ namespace SharpMonoInjector.Gui.ViewModels
                     
                     _configService.SaveSettings(_settings);
                     
-                    
                     RecentProfiles = new ObservableCollection<InjectionProfile>(_settings.RecentProfiles);
                     Status = $"Profile renamed to '{newName}'";
                     _loggingService.Info($"Profile '{oldName}' renamed to '{newName}'", "ProfileManager");
@@ -263,13 +281,9 @@ namespace SharpMonoInjector.Gui.ViewModels
         private async void ExecuteRefreshCommand(object parameter)
         {
             _loggingService.Info("Starting process refresh", "ProcessScanner");
-            File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[MainWindowViewModel] - ExecuteRefresh Entered\r\n");
             IsRefreshing = true;
             Status = "Refreshing processes";
             ObservableCollection<MonoProcess> processes = new ObservableCollection<MonoProcess>();
-
-            File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[MainWindowViewModel] - Setting Process Access Rights:\r\n\tPROCESS_QUERY_INFORMATION\r\n\tPROCESS_VM_READ\r\n");
-            File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "[MainWindowViewModel] - Checking Processes for Mono\r\n");
 
             await Task.Run(() =>
             {
@@ -279,15 +293,11 @@ namespace SharpMonoInjector.Gui.ViewModels
                 {
                     try
                     {
-                        
-
                         if (ScanOnlyMonoGames && !IsMonoGameProcess(p))
                         {
                             continue; 
                         }
 
-
-                        
                         var t = GetProcessUser(p);
 
                         if (t != null)
@@ -302,10 +312,8 @@ namespace SharpMonoInjector.Gui.ViewModels
 
                             if ((handle = Native.OpenProcess(flags, false, p.Id)) != IntPtr.Zero)
                             {
-                                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "\t" + p.ProcessName + ".exe\r\n");
                                 if (ProcessUtils.GetMonoModule(handle, out IntPtr mono))
                                 {
-                                    File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "\t\tMono found in process: " + p.ProcessName + ".exe\r\n");
                                     _loggingService.Success($"Found Mono process: {p.ProcessName} (PID: {p.Id})", "ProcessScanner");
                                     processes.Add(new MonoProcess
                                     {
@@ -321,13 +329,9 @@ namespace SharpMonoInjector.Gui.ViewModels
                     }
                     catch(Exception e) 
                     { 
-                        File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "    ERROR SCANNING: " + p.ProcessName + " - " + e.Message + "\r\n");
                         _loggingService.Error($"Error scanning {p.ProcessName}: {e.Message}", "ProcessScanner");
                     }
-
                 }
-
-                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "FINISHED SCANNING PROCESSES...\r\n");
             });
 
             Processes = processes;
@@ -343,7 +347,6 @@ namespace SharpMonoInjector.Gui.ViewModels
             {
                 Status = "No Mono processess found!";
                 _loggingService.Warning("No Mono processes found", "ProcessScanner");
-                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "No Mono processess found:\r\n");
             }
 
             IsRefreshing = false;
@@ -379,7 +382,472 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         private void ExecuteInjectCommand(object parameter)
         {
-            _loggingService.Info($"Starting injection: {Path.GetFileName(AssemblyPath)}", "Injector");
+            Process gameProcess;
+            try
+            {
+                gameProcess = Process.GetProcessById(SelectedProcess.Id);
+            }
+            catch (Exception ex)
+            {
+                Status = "Error: Target process not found or closed.";
+                _loggingService.Error($"Failed to get process by ID {SelectedProcess.Id}: {ex.Message}", "Injector");
+                return;
+            }
+
+            string gameDirectory = Path.GetDirectoryName(gameProcess.MainModule.FileName);
+            string gameExecutableName = Path.GetFileNameWithoutExtension(gameProcess.MainModule.FileName);
+
+            _loggingService.Info($"Scanning for BepInEx installations for game: {gameExecutableName}", "Injector");
+
+            var locations = DetectAllBepInExLocations(gameDirectory, gameExecutableName);
+
+            var standard = locations.FirstOrDefault(l => l.Type == BepInExType.Standard);
+            var modManager = locations.FirstOrDefault(l => l.Type == BepInExType.ModManager);
+
+            bool standardExists = standard != null;
+            bool standardHasReceiver = standard?.HasReceiver ?? false;
+            bool modManagerExists = modManager != null;
+            bool modManagerHasReceiver = modManager?.HasReceiver ?? false;
+
+            _loggingService.Info($"Detection Results: Standard={standardExists} (Receiver={standardHasReceiver}), ModManager={modManagerExists} (Receiver={modManagerHasReceiver})", "Injector");
+
+            if (standardHasReceiver && modManagerHasReceiver)
+            {
+                _loggingService.Info("Both receivers detected - auto-trying both methods", "Injector");
+                SmartAutoTryBoth(standard, modManager);
+            }
+            else if (standardHasReceiver)
+            {
+                _loggingService.Info("Only standard receiver detected - using it", "Injector");
+                AttemptSingleMethod(standard);
+            }
+            else if (modManagerHasReceiver)
+            {
+                _loggingService.Info("Only mod manager receiver detected - using it", "Injector");
+                AttemptSingleMethod(modManager);
+            }
+            else if (standardExists && modManagerExists)
+            {
+                HandleBothExistNoReceivers(standard.Path, modManager.Path);
+            }
+            else if (standardExists)
+            {
+                HandleStandardOnlyNoReceiver(standard.Path);
+            }
+            else if (modManagerExists)
+            {
+                HandleModManagerOnlyNoReceiver(modManager.Path);
+            }
+            else
+            {
+                _loggingService.Info("No BepInEx detected. Using standard injection", "Injector");
+                ExecuteStandardInjection();
+            }
+        }
+
+        private void SmartAutoTryBoth(BepInExLocation standard, BepInExLocation modManager)
+        {
+            _loggingService.Info("Trying Standard BepInEx first...", "Injector");
+            
+            IsExecuting = true;
+            Status = "Trying Standard BepInEx...";
+
+            bool standardSuccess = InjectViaPipe(AssemblyPath, InjectNamespace, InjectClassName, InjectMethodName);
+
+            if (standardSuccess)
+            {
+                Status = "✓ Injection successful (Standard BepInEx)";
+                _loggingService.Success($"Successfully injected via Standard BepInEx", "Injector");
+                SaveCurrentSettings();
+                ExecuteSaveProfileCommand(null);
+                IsExecuting = false;
+                return;
+            }
+
+            _loggingService.Info("Standard failed, trying Mod Manager...", "Injector");
+            Status = "Trying Mod Manager...";
+
+            bool modManagerSuccess = InjectViaPipe(AssemblyPath, InjectNamespace, InjectClassName, InjectMethodName);
+
+            if (modManagerSuccess)
+            {
+                Status = "✓ Injection successful (Mod Manager)";
+                _loggingService.Success($"Successfully injected via Mod Manager", "Injector");
+                SaveCurrentSettings();
+                ExecuteSaveProfileCommand(null);
+                IsExecuting = false;
+                return;
+            }
+
+            IsExecuting = false;
+            _loggingService.Warning("Both receiver methods failed", "Injector");
+            
+            var result = MessageBox.Show(
+                "⚠️ Both Receiver Methods Failed!\n\n" +
+                "You have receivers installed in both locations, but neither responded.\n" +
+                "This usually means the game wasn't started with BepInEx at all.\n\n" +
+                "Would you like to try direct memory injection instead?\n" +
+                "(This bypasses BepInEx entirely)\n\n" +
+                $"💬 Need help? Join Discord: {DISCORD_LINK}",
+                "Both Methods Failed",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _loggingService.Info("User chose direct injection fallback", "Injector");
+                ExecuteStandardInjection();
+            }
+            else
+            {
+                Status = "✗ Injection failed - restart game with BepInEx";
+            }
+        }
+
+        private void AttemptSingleMethod(BepInExLocation location)
+        {
+            string typeStr = location.Type == BepInExType.Standard ? "Standard BepInEx" : "Mod Manager";
+            
+            IsExecuting = true;
+            Status = $"Injecting via {typeStr}...";
+
+            bool success = InjectViaPipe(AssemblyPath, InjectNamespace, InjectClassName, InjectMethodName);
+
+            if (success)
+            {
+                Status = $"✓ Injection successful ({typeStr})";
+                _loggingService.Success($"Successfully injected via {typeStr}", "Injector");
+                SaveCurrentSettings();
+                ExecuteSaveProfileCommand(null);
+                IsExecuting = false;
+                return;
+            }
+
+            IsExecuting = false;
+            _loggingService.Warning($"{typeStr} receiver failed to respond", "Injector");
+            
+            string message;
+            if (location.Type == BepInExType.ModManager)
+            {
+                message = "⚠️ Mod Manager Receiver Not Responding!\n\n" +
+                        "The receiver plugin exists in the mod manager folder,\n" +
+                        "but it's NOT loaded into the game!\n\n" +
+                        "Common causes:\n" +
+                        "  • Plugin is disabled in mod manager settings\n" +
+                        "  • BepInEx failed to initialize\n" +
+                        "  • Plugin load order issue\n" +
+                        "  • Mod manager didn't start BepInEx properly\n\n" +
+                        "SOLUTIONS:\n" +
+                        "1. Check if the receiver is enabled in your mod manager\n" +
+                        "2. Check BepInEx console for load errors\n" +
+                        "3. Try restarting the game via the mod manager\n\n" +
+                        "OR try direct memory injection instead?\n" +
+                        "(Bypasses BepInEx entirely - always works)\n\n" +
+                        $"💬 Need help? Join Discord: {DISCORD_LINK}";
+            }
+            else
+            {
+                message = $"⚠️ Standard BepInEx Receiver Not Responding!\n\n" +
+                        "The receiver plugin exists but isn't responding.\n" +
+                        "This usually means:\n" +
+                        "  • The game wasn't started with BepInEx\n" +
+                        "  • BepInEx failed to load the plugin\n\n" +
+                        "Would you like to try direct memory injection instead?\n" +
+                        "(This bypasses BepInEx entirely)\n\n" +
+                        $"💬 Need help? Join Discord: {DISCORD_LINK}";
+            }
+            
+            var result = MessageBox.Show(
+                message,
+                "Receiver Not Loaded Into Game",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _loggingService.Info("User chose direct injection fallback", "Injector");
+                ExecuteStandardInjection();
+            }
+            else
+            {
+                Status = "✗ Injection failed - check mod manager settings";
+            }
+        }
+
+        private void HandleBothExistNoReceivers(string standardPath, string modManagerPath)
+        {
+            _loggingService.Warning("Both BepInEx installations exist but neither has receiver", "Injector");
+            Status = "⚠ Multiple BepInEx detected! Receiver required.";
+            
+            var result = MessageBox.Show(
+                "⚠️ Multiple BepInEx Installations Without Receiver!\n\n" +
+                "You have BepInEx in TWO locations:\n" +
+                "  • Standard (game folder)\n" +
+                "  • Mod Manager (Thunderstore/r2modman)\n\n" +
+                "But NEITHER has the receiver plugin!\n\n" +
+                "📍 RECOMMENDED: Install in Standard BepInEx\n" +
+                $"   Path: {Path.Combine(standardPath, "plugins")}\n\n" +
+                "TO FIX THIS:\n" +
+                $"1. Get the receiver from Discord: {DISCORD_LINK}\n" +
+                $"2. Copy '{RECEIVER_DLL_NAME}'\n" +
+                "3. Paste into Standard BepInEx plugins folder (recommended)\n" +
+                "4. Restart the game\n\n" +
+                "Do you want to try direct injection anyway? (NOT RECOMMENDED)", 
+                "Receiver Plugin Required", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _loggingService.Warning("User chose to inject without receiver (risky!)", "Injector");
+                ExecuteStandardInjection();
+            }
+            else
+            {
+                _loggingService.Info("User canceled - waiting for receiver installation", "Injector");
+                Status = "Injection canceled - install receiver first";
+            }
+        }
+
+        private void HandleStandardOnlyNoReceiver(string standardPath)
+        {
+            _loggingService.Warning("Standard BepInEx detected without receiver plugin", "Injector");
+            Status = "⚠ BepInEx detected! Receiver plugin required.";
+            
+            var result = MessageBox.Show(
+                "⚠️ Standard BepInEx Without Receiver Plugin!\n\n" +
+                "BepInEx is installed in the game folder, but the receiver plugin is missing.\n\n" +
+                "Without the receiver plugin:\n" +
+                "  • Injection may crash immediately\n" +
+                "  • Your mod may not work properly\n" +
+                "  • Game stability is not guaranteed\n\n" +
+                "TO FIX THIS:\n" +
+                $"1. Get the receiver from Discord: {DISCORD_LINK}\n" +
+                $"2. Copy '{RECEIVER_DLL_NAME}'\n" +
+                $"3. Paste into: {Path.Combine(standardPath, "plugins")}\n" +
+                "4. Restart the game\n\n" +
+                "Do you want to try injecting anyway? (NOT RECOMMENDED)", 
+                "Receiver Plugin Missing", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _loggingService.Warning("User chose to inject without receiver (risky!)", "Injector");
+                ExecuteStandardInjection();
+            }
+            else
+            {
+                _loggingService.Info("User canceled - waiting for receiver installation", "Injector");
+                Status = "Injection canceled - install receiver first";
+            }
+        }
+
+        private void HandleModManagerOnlyNoReceiver(string modManagerPath)
+        {
+            _loggingService.Warning("Mod Manager BepInEx detected without receiver plugin", "Injector");
+            Status = "⚠ Mod Manager detected! Receiver plugin required.";
+            
+            var result = MessageBox.Show(
+                "⚠️ Mod Manager Without Receiver Plugin!\n\n" +
+                "You're using a mod manager, but the receiver plugin is missing.\n\n" +
+                "📍 RECOMMENDED: Install in Standard BepInEx Instead\n" +
+                "   Installing in the game folder is more reliable and easier.\n\n" +
+                "OPTION 1 (Recommended): Install in Standard BepInEx\n" +
+                $"   1. Get receiver from Discord: {DISCORD_LINK}\n" +
+                "   2. Create folder: [Game]\\BepInEx\\plugins\\\n" +
+                $"   3. Copy '{RECEIVER_DLL_NAME}' there\n" +
+                "   4. Restart game normally (not via mod manager)\n\n" +
+                "OPTION 2: Install via Mod Manager\n" +
+                "   1. Install receiver through your mod manager\n" +
+                "   2. Restart game through mod manager\n\n" +
+                "Do you want to try direct injection anyway? (NOT RECOMMENDED)", 
+                "Receiver Plugin Missing", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _loggingService.Warning("User chose to inject without receiver (risky!)", "Injector");
+                ExecuteStandardInjection();
+            }
+            else
+            {
+                _loggingService.Info("User canceled - waiting for receiver installation", "Injector");
+                Status = "Injection canceled - install receiver first";
+            }
+        }
+
+        private List<BepInExLocation> DetectAllBepInExLocations(string gameDirectory, string gameExecutableName)
+        {
+            var locations = new List<BepInExLocation>();
+
+            string standardBepInExPath = Path.Combine(gameDirectory, "BepInEx");
+            if (Directory.Exists(standardBepInExPath))
+            {
+                string standardPluginPath = Path.Combine(standardBepInExPath, "plugins", RECEIVER_DLL_NAME);
+                bool hasReceiver = File.Exists(standardPluginPath);
+                
+                locations.Add(new BepInExLocation
+                {
+                    Type = BepInExType.Standard,
+                    Path = standardBepInExPath,
+                    HasReceiver = hasReceiver,
+                    ReceiverPath = hasReceiver ? standardPluginPath : null
+                });
+
+                _loggingService.Info($"Standard BepInEx detected: {standardBepInExPath} (Receiver: {hasReceiver})", "Injector");
+            }
+
+            string modManagerReceiverPath = FindModManagerReceiver(gameExecutableName);
+            if (!string.IsNullOrEmpty(modManagerReceiverPath))
+            {
+                string modManagerBepInExPath = Path.GetDirectoryName(Path.GetDirectoryName(modManagerReceiverPath));
+                
+                locations.Add(new BepInExLocation
+                {
+                    Type = BepInExType.ModManager,
+                    Path = modManagerBepInExPath,
+                    HasReceiver = true,
+                    ReceiverPath = modManagerReceiverPath
+                });
+
+                _loggingService.Success($"Mod Manager BepInEx detected: {modManagerBepInExPath}", "Injector");
+            }
+
+            return locations;
+        }
+
+        private string FindModManagerReceiver(string gameExecutableName)
+        {
+            try
+            {
+                string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string roamingAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                
+                string[] thunderstoreBases = new[]
+                {
+                    Path.Combine(localAppData, "Thunderstore Mod Manager", "DataFolder"),
+                    Path.Combine(roamingAppData, "Thunderstore Mod Manager", "DataFolder"),
+                    Path.Combine(roamingAppData, "r2modmanPlus-local", "profiles")
+                };
+
+                foreach (var thunderstoreBase in thunderstoreBases)
+                {
+                    if (!Directory.Exists(thunderstoreBase))
+                    {
+                        continue;
+                    }
+
+                    _loggingService.Info($"Checking mod manager location: {thunderstoreBase}", "Injector");
+
+                    var gameFolders = Directory.GetDirectories(thunderstoreBase);
+                    foreach (var gameFolder in gameFolders)
+                    {
+                        string gameName = Path.GetFileName(gameFolder);
+                        
+                        if (gameName.IndexOf(gameExecutableName, StringComparison.OrdinalIgnoreCase) < 0)
+                            continue;
+
+                        _loggingService.Info($"Found matching game folder: {gameName}", "Injector");
+
+                        string profilesPath = Path.Combine(gameFolder, "profiles");
+                        if (!Directory.Exists(profilesPath))
+                            profilesPath = gameFolder;
+
+                        if (Directory.Exists(profilesPath))
+                        {
+                            var profiles = Directory.GetDirectories(profilesPath);
+                            foreach (var profile in profiles)
+                            {
+                                string profileName = Path.GetFileName(profile);
+                                _loggingService.Info($"Checking profile: {profileName}", "Injector");
+
+                                string bepinexPluginsPath = Path.Combine(profile, "BepInEx", "plugins");
+                                if (!Directory.Exists(bepinexPluginsPath))
+                                    continue;
+
+                                string receiverPath = SearchForReceiverDLL(bepinexPluginsPath);
+                                if (receiverPath != null)
+                                {
+                                    _loggingService.Success($"Found mod manager receiver: {receiverPath}", "Injector");
+                                    return receiverPath;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _loggingService.Info("No mod manager receiver found", "Injector");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _loggingService.Error($"Error searching mod manager: {ex.Message}", "Injector");
+                return null;
+            }
+        }
+
+        private string SearchForReceiverDLL(string startPath)
+        {
+            try
+            {
+                string directPath = Path.Combine(startPath, RECEIVER_DLL_NAME);
+                if (File.Exists(directPath))
+                    return directPath;
+
+                foreach (var dir in Directory.GetDirectories(startPath))
+                {
+                    string result = SearchForReceiverDLL(dir);
+                    if (result != null)
+                        return result;
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool InjectViaPipe(string assemblyPath, string namespaceName, string className, string methodName)
+        {
+            try
+            {
+                using (var client = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.Out))
+                {
+                    client.Connect(5000);
+
+                    using (var writer = new StreamWriter(client))
+                    {
+                        string typeName = string.IsNullOrEmpty(namespaceName) 
+                            ? className 
+                            : $"{namespaceName}.{className}";
+                        
+                        string message = $"{assemblyPath}|{typeName}|{methodName}";
+                        _loggingService.Info($"Sending pipe message: {message}", "Injector");
+                        writer.Write(message);
+                        writer.Flush();
+                    }
+                }
+                return true;
+            }
+            catch (TimeoutException)
+            {
+                _loggingService.Warning("Pipe connection timed out (receiver not responding)", "Injector");
+                return false;
+            }
+            catch (Exception e)
+            {
+                _loggingService.Error($"Pipe error: {e.Message}", "Injector");
+                return false;
+            }
+        }
+
+        private void ExecuteStandardInjection()
+        {
+            _loggingService.Info($"Starting standard injection: {Path.GetFileName(AssemblyPath)}", "Injector");
             
             IntPtr handle = IntPtr.Zero;
             try
@@ -417,13 +885,13 @@ namespace SharpMonoInjector.Gui.ViewModels
             IsExecuting = true;
             Status = "Injecting " + Path.GetFileName(AssemblyPath);
 
-            using (Injector injector = new Injector(handle, SelectedProcess.MonoModule))
+            using (Injector injector = new Injector(handle, SelectedProcess.MonoModule, _loggingService.Info))
             {
                 injector.Options = new InjectionOptions
                 {
                     RandomizeMemory = UseStealthMode,
                     HideThreads = UseStealthMode,
-                    ObfuscateCode = false,
+                    ObfuscateCode = UseStealthMode,
                     DelayExecution = UseStealthMode,
                     DelayMs = 150
                 };
@@ -497,7 +965,7 @@ namespace SharpMonoInjector.Gui.ViewModels
 
             ProcessUtils.GetMonoModule(handle, out IntPtr mono);
 
-            using (Injector injector = new Injector(handle, mono))
+            using (Injector injector = new Injector(handle, mono, _loggingService.Info))
             {
                 try
                 {
@@ -617,7 +1085,6 @@ namespace SharpMonoInjector.Gui.ViewModels
             }
             catch (Exception)
             {
-                // Ignores on
             }
         }
 
@@ -678,7 +1145,6 @@ namespace SharpMonoInjector.Gui.ViewModels
                                     MonoModule = mono
                                 };
 
-                                
                                 if (!Processes.Any(p => p.Id == monoProcess.Id))
                                 {
                                     Processes.Add(monoProcess);
@@ -763,14 +1229,13 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         #endregion
 
-
-
         private bool _scanOnlyMonoGames;
         public bool ScanOnlyMonoGames
         {
             get => _scanOnlyMonoGames;
             set => Set(ref _scanOnlyMonoGames, value);
         }
+        
         private bool IsMonoGameProcess(Process p)
         {
             try
@@ -1045,9 +1510,8 @@ namespace SharpMonoInjector.Gui.ViewModels
                     result = user.Contains(@"\") ? user.Substring(user.IndexOf(@"\") + 1) : user;
                 }
             }
-            catch(Exception ex)
+            catch
             {
-                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "    Error Getting User Process: " + process.ProcessName + " - " + ex.Message + "\r\n");
                 return null;
             }
             finally
@@ -1085,8 +1549,6 @@ namespace SharpMonoInjector.Gui.ViewModels
 
                 if (instances.Count > 0)
                 {
-                    File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "AntiVirus Installed: True\r\n");
-
                     string installedAVs = "Installed AntiVirus':\r\n";
                     foreach(ManagementBaseObject av in instances)
                     {
@@ -1094,9 +1556,7 @@ namespace SharpMonoInjector.Gui.ViewModels
                         installedAVs += "   " + AVInstalled + "\r\n";
                         avs.Add(AVInstalled.ToLower());
                     }
-                    File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", installedAVs + "\r\n");
                 }
-                else { File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "AntiVirus Installed: False\r\n"); }
 
                 foreach (Process p in Process.GetProcesses())
                 {
@@ -1104,16 +1564,14 @@ namespace SharpMonoInjector.Gui.ViewModels
                     {
                         if (detectedAV.EndsWith(p.ProcessName.ToLower() + ".exe"))
                         {
-                            File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "AntiVirus Running: " + detectedAV + "\r\n");
                         }
                     }
                 }
 
                 if (defenderFlag) { return false; } else { return instances.Count > 0;}                
             }
-            catch (Exception e)
+            catch
             {
-                File.AppendAllText(AppDomain.CurrentDomain.BaseDirectory + "\\DebugLog.txt", "Error Checking for AV: " + e.Message + "\r\n");
             }
 
             return false;

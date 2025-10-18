@@ -7,10 +7,11 @@
         xmlns:vm="clr-namespace:SharpMonoInjector.Gui.ViewModels"
         xmlns:cv="clr-namespace:SharpMonoInjector.Gui.Converters"
         mc:Ignorable="d"
-        Title="SharpMonoInjector 2.6 T Edition" 
+        Title="SharpMonoInjector 2.7 T Edition" 
         Height="550" Width="850" 
         WindowStyle="None" 
-        ResizeMode="NoResize" 
+    
+    ResizeMode="NoResize" 
         Background="#FF1A1A1A"
         AllowsTransparency="True"
         Closing="Window_Closing">
@@ -23,482 +24,647 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
+           
+     <RowDefinition Height="*"/>
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" 
                     Background="#FF000000" 
                     CornerRadius="8,8,0,0"
-                    MouseLeftButtonDown="Window_MouseLeftButtonDown">
+          
+          MouseLeftButtonDown="Window_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+    
+                    <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="15,0,0,0">
                         <Image Source="/smi_gui;component/Resources/icon.ico" 
-                               Width="24" Height="24" 
+          
+                     Width="24" Height="24" 
                                Margin="0,0,10,0"
                                VerticalAlignment="Center"/>
-                        <TextBlock Text="SharpMonoInjector" 
+               
+         <TextBlock Text="SharpMonoInjector" 
                                    FontFamily="Segoe UI"
                                    FontSize="16"
-                                   FontWeight="Bold"
+                  
+                 FontWeight="Bold"
                                    Foreground="#FF00E676"
                                    VerticalAlignment="Center"/>
-                        <TextBlock Text="2.6 TheHolyOneZ Edition" 
+             
+           <TextBlock Text="2.7 TheHolyOneZ Edition" 
                                    FontFamily="Segoe UI"
                                    FontSize="11"
-                                   Foreground="#FF808080"
+              
+                     Foreground="#FF808080"
                                    VerticalAlignment="Center"
                                    Margin="8,0,0,0"/>
-                    </StackPanel>
+         
+           </StackPanel>
 
                        
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,10,0">
                         <Button Content="📋" 
-                                Width="40" Height="30"
+                 
+               Width="40" Height="30"
                                 Background="Transparent"
                                 Foreground="#FF00E676"
-                                BorderThickness="0"
+                    
+            BorderThickness="0"
                                 FontSize="16"
                                 Click="OpenLogViewer_Click"
-                                Cursor="Hand"
+                        
+        Cursor="Hand"
                                 ToolTip="Open Log Viewer">
                             <Button.Style>
-                                <Style TargetType="Button">
+                              
+  <Style TargetType="Button">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="Template">
-                                        <Setter.Value>
+                      
+                  <Setter.Value>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                     
+           <Border Background="{TemplateBinding Background}" CornerRadius="4">
                                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
+                                
+                </Border>
                                             </ControlTemplate>
-                                        </Setter.Value>
+                                        
+</Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
+                            
+            <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="#FF2F2F2F"/>
-                                        </Trigger>
+                                        
+</Trigger>
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                        </Button>
+    
+                    </Button>
                     
                
    
                          <Button Content="⚡" 
-                                Width="40" Height="30"
+               
+                 Width="40" Height="30"
                                 Background="Transparent"
                                 Foreground="#FF00E676"
-                                BorderThickness="0"
+                  
+              BorderThickness="0"
                                 FontSize="16"
                                 Command="{Binding OpenProcessMonitorCommand}"
-                                Cursor="Hand"
+                     
+           Cursor="Hand"
                                 ToolTip="Open Process Monitor">
                             <Button.Style>
-                                <Style TargetType="Button">
+                           
+     <Style TargetType="Button">
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="Template">
-                                        <Setter.Value>
+                   
+                     <Setter.Value>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                  
+              <Border Background="{TemplateBinding Background}" CornerRadius="4">
                                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
+                             
+                   </Border>
                                             </ControlTemplate>
-                                        </Setter.Value>
+                                     
+   </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
+                         
+               <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="#FF2F2F2F"/>
-                                        </Trigger>
+                                     
+   </Trigger>
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                        </Button>
+ 
+                       </Button>
 
                         <Button Content="—" 
                                 Width="40" Height="30"
-                                Background="Transparent"
+                  
+              Background="Transparent"
                                 Foreground="#FFFFFFFF"
                                 BorderThickness="0"
-                                FontSize="16"
+                      
+          FontSize="16"
                                 Click="Window_Minimize"
                                 Cursor="Hand">
-                            <Button.Style>
+                          
+  <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Background" Value="Transparent"/>
-                                    <Setter Property="Template">
+                           
+         <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+     
+                                           <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                    <ContentPresenter HorizontalAlignment="Center" 
+VerticalAlignment="Center"/>
                                                 </Border>
                                             </ControlTemplate>
-                                        </Setter.Value>
+        
+                                </Setter.Value>
                                     </Setter>
-                                    <Style.Triggers>
+                                
+    <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="Background" Value="#FF2F2F2F"/>
-                                        </Trigger>
+        
+                                </Trigger>
                                     </Style.Triggers>
-                                </Style>
+                                
+</Style>
                             </Button.Style>
                         </Button>
           
                         <Button Content="✕" 
-                                Width="40" Height="30"
+            
+                    Width="40" Height="30"
                                 Background="Transparent"
                                 Foreground="#FFFFFFFF"
-                                BorderThickness="0"
+               
+                 BorderThickness="0"
                                 FontSize="16"
                                 Click="Window_Exit"
-                                Cursor="Hand">
+                   
+             Cursor="Hand">
                             <Button.Style>
                                 <Style TargetType="Button">
-                                    <Setter Property="Background" Value="Transparent"/>
+                          
+          <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="Template">
                                         <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
+           
+                                 <ControlTemplate TargetType="Button">
                                                 <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+               
+                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
-                                            </ControlTemplate>
+             
+                               </ControlTemplate>
                                         </Setter.Value>
-                                    </Setter>
+                             
+       </Setter>
                                     <Style.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FFE81123"/>
+               
+                             <Setter Property="Background" Value="#FFE81123"/>
                                         </Trigger>
-                                    </Style.Triggers>
+                             
+       </Style.Triggers>
                                 </Style>
                             </Button.Style>
                         </Button>
-                    </StackPanel>
+         
+           </StackPanel>
                 </Grid>
             </Border>
 
             <Grid Grid.Row="1" Margin="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.2*"/>
-                    <ColumnDefinition Width="20"/>
+          
+          <ColumnDefinition Width="20"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+               
+ </Grid.RowDefinitions>
 
                 <Border Grid.Column="0" Grid.Row="0"
                         Background="#FF1E1E1E" 
                         CornerRadius="8"
                         Padding="20">
-                    <Grid>
+        
+            <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+      
+                  </Grid.RowDefinitions>
 
                         <Label Grid.Row="0" Content="INJECT" Style="{StaticResource TitleLabel}"/>
 
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                            <ScrollViewer.Resources>
+                            
+<ScrollViewer.Resources>
                                 <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBar}"/>
                             </ScrollViewer.Resources>
                             <StackPanel Margin="0,0,10,0">
-                                <Grid Margin="0,0,0,15">
+       
+                         <Grid Margin="0,0,0,15">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
+                                      
+  <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="10"/>
                                         <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+               
+                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
+  
+                                      <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <Label Grid.Row="0" Grid.Column="0" 
+                         
+           <Label Grid.Row="0" Grid.Column="0" 
                                            Content="Process" 
-                                           Style="{StaticResource ModernLabel}"/>
+                                          
+ Style="{StaticResource ModernLabel}"/>
                                     <ComboBox Grid.Row="1" Grid.Column="0" 
                                               Style="{StaticResource ModernComboBox}"
-                                              ItemsSource="{Binding Path=Processes}" 
+            
+                                  ItemsSource="{Binding Path=Processes}" 
                                               SelectedItem="{Binding Path=SelectedProcess}">
-                                        <ComboBox.ItemTemplate>
+                 
+                       <ComboBox.ItemTemplate>
                                             <DataTemplate>
-                                                <TextBlock Text="{Binding Converter={StaticResource MonoProcessToStringConverter}}"/>
+                                 
+               <TextBlock Text="{Binding Converter={StaticResource MonoProcessToStringConverter}}"/>
                                             </DataTemplate>
-                                        </ComboBox.ItemTemplate>
+                                      
+  </ComboBox.ItemTemplate>
                                     </ComboBox>
                                     <Button Grid.Row="1" Grid.Column="2" 
-                                            Content="Refresh" 
+                       
+                     Content="Refresh" 
                                             Style="{StaticResource SecondaryButton}"
-                                            Command="{Binding Path=RefreshCommand, IsAsync=True}"/>
+                                 
+           Command="{Binding Path=RefreshCommand, IsAsync=True}"/>
                                 </Grid>
 
                                 <Label Content="Assembly to inject" Style="{StaticResource ModernLabel}"/>
-                                <Grid Margin="0,0,0,15">
+                  
+              <Grid Margin="0,0,0,15">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
+        
+                                <ColumnDefinition Width="10"/>
                                         <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                          
+          </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" 
                                              Style="{StaticResource ModernTextBox}"
-                                             Text="{Binding Path=AssemblyPath, UpdateSourceTrigger=PropertyChanged}"/>
+      
+                                       Text="{Binding Path=AssemblyPath, UpdateSourceTrigger=PropertyChanged}"/>
                                     <Button Grid.Column="2" 
-                                            Content="Browse" 
+                     
+                       Content="Browse" 
                                             Style="{StaticResource SecondaryButton}"
-                                            Command="{Binding Path=BrowseCommand}"/>
+                               
+             Command="{Binding Path=BrowseCommand}"/>
                                 </Grid>
 
                                 <Label Content="Recent Assemblies" Style="{StaticResource ModernLabel}"/>
-                                <ListBox Style="{StaticResource ModernListBox}"
+                  
+              <ListBox Style="{StaticResource ModernListBox}"
                                          Height="90"
                                          ItemsSource="{Binding Path=RecentAssemblies}"
-                                         Margin="0,0,0,15">
+ 
+                                        Margin="0,0,0,15">
                                     <ListBox.ItemTemplate>
-                                        <DataTemplate>
+                        
+                <DataTemplate>
                                             <Grid>
-                                                <Grid.ColumnDefinitions>
+                                        
+        <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="30"/>
+                                       
+             <ColumnDefinition Width="30"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" 
+                                      
+          <TextBlock Grid.Column="0" 
                                                            Text="{Binding}" 
-                                                           TextTrimming="CharacterEllipsis" 
+                            
+                               TextTrimming="CharacterEllipsis" 
                                                            ToolTip="{Binding}"
-                                                           VerticalAlignment="Center"
-                                                           MouseLeftButtonDown="RecentAssembly_Click"/>
+         
+                                                  VerticalAlignment="Center"
+                                                  
+         MouseLeftButtonDown="RecentAssembly_Click"/>
                                                 <Button Grid.Column="1" 
-                                                        Content="✕"
+                                         
+               Content="✕"
                                                         Style="{StaticResource DeleteButton}"
-                                                        Command="{Binding DataContext.DeleteRecentAssemblyCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                            
+                            Command="{Binding DataContext.DeleteRecentAssemblyCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="Remove from recents"/>
+             
+                                           ToolTip="Remove from recents"/>
                                             </Grid>
-                                        </DataTemplate>
+           
+                             </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-                                <Label Content="Namespace" Style="{StaticResource ModernLabel}"/>
+   
+                             <Label Content="Namespace" Style="{StaticResource ModernLabel}"/>
                                 <TextBox Style="{StaticResource ModernTextBox}"
-                                         Text="{Binding Path=InjectNamespace, UpdateSourceTrigger=PropertyChanged}"
+                                  
+       Text="{Binding Path=InjectNamespace, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,0,15"/>
 
                                 <Label Content="Class name" Style="{StaticResource ModernLabel}"/>
-                                <TextBox Style="{StaticResource ModernTextBox}"
+              
+                  <TextBox Style="{StaticResource ModernTextBox}"
                                          Text="{Binding Path=InjectClassName, UpdateSourceTrigger=PropertyChanged}"
-                                         Margin="0,0,0,15"/>
+                                     
+    Margin="0,0,0,15"/>
 
                                 <Label Content="Method name" Style="{StaticResource ModernLabel}"/>
                                 <TextBox Style="{StaticResource ModernTextBox}"
-                                         Text="{Binding Path=InjectMethodName, UpdateSourceTrigger=PropertyChanged}"
+                          
+               Text="{Binding Path=InjectMethodName, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="0,0,0,15"/>
 
                                 <CheckBox Style="{StaticResource ModernCheckBox}"
-                                          Content="Enable Stealth Mode"
-                                          IsChecked="{Binding Path=UseStealthMode}"
-                                          Margin="0,0,0,15"/>
+        
+                                  Content="Enable Stealth Mode"
+                                          IsChecked="{Binding Path=UseStealthMode, Mode=TwoWay}"
+                     
+                     Margin="0,0,0,15"/>
 
                                 <Grid Margin="0,0,0,15">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
+          
+                              <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="10"/>
-                                        <ColumnDefinition Width="*"/>
+                            
+            <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Button Grid.Column="0"
-                                            Content="💾 Save Profile" 
+              
+                              Content="💾 Save Profile" 
                                             Style="{StaticResource SecondaryButton}"
-                                            Command="{Binding Path=SaveProfileCommand}"
+                      
+                      Command="{Binding Path=SaveProfileCommand}"
                                             ToolTip="Save current settings as a profile"/>
-                                    <Button Grid.Column="2"
+                            
+        <Button Grid.Column="2"
                                             Content="🗑️ Clear All" 
-                                            Style="{StaticResource SecondaryButton}"
+                                            
+Style="{StaticResource SecondaryButton}"
                                             Command="{Binding Path=ClearRecentsCommand}"
                                             ToolTip="Clear all recent items"/>
-                                </Grid>
+       
+                         </Grid>
 
                                 <Button Content="INJECT" 
-                                        Style="{StaticResource ModernButton}"
+                                        Style="{StaticResource 
+ModernButton}"
                                         HorizontalAlignment="Stretch"
                                         Command="{Binding Path=InjectCommand}"
-                                        Height="40"
+                   
+                     Height="40"
                                         FontSize="14"/>
                             </StackPanel>
-                        </ScrollViewer>
+           
+             </ScrollViewer>
                     </Grid>
                 </Border>
 
                 <Border Grid.Column="2" Grid.Row="0"
                         Background="#FF1E1E1E" 
-                        CornerRadius="8"
+        
+                CornerRadius="8"
                         Padding="20">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
+                
+            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <Label Grid.Row="0" Content="EJECT" Style="{StaticResource TitleLabel}"/>
 
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+      
+                  <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <ScrollViewer.Resources>
                                 <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBar}"/>
-                            </ScrollViewer.Resources>
+                
+            </ScrollViewer.Resources>
                             <StackPanel Margin="0,0,10,0">
                                 <Label Content="Saved Profiles" Style="{StaticResource ModernLabel}"/>
-                                <ListBox Style="{StaticResource ModernListBox}"
+                       
+         <ListBox Style="{StaticResource ModernListBox}"
                                          Height="130"
                                          ItemsSource="{Binding Path=RecentProfiles}"
-                                         Margin="0,0,0,15">
+      
+                                   Margin="0,0,0,15">
                                     <ListBox.ItemTemplate>
-                                        <DataTemplate>
+                             
+           <DataTemplate>
                                             <Grid>
-                                                <Grid.ColumnDefinitions>
+                                             
+   <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
+                                            
+        <ColumnDefinition Width="30"/>
                                                     <ColumnDefinition Width="30"/>
-                                                    <ColumnDefinition Width="30"/>
-                                                </Grid.ColumnDefinitions>
+                                      
+          </Grid.ColumnDefinitions>
                                                 <StackPanel Grid.Column="0" 
-                                                            MouseLeftButtonDown="RecentProfile_Click"
+                                        
+                    MouseLeftButtonDown="RecentProfile_Click"
                                                             Cursor="Hand">
-                                                    <TextBlock Text="{Binding Name}" 
+                    
+                                <TextBlock Text="{Binding Name}" 
                                                                FontWeight="SemiBold"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock FontSize="11" Foreground="#FF808080">
+  
+                                                             TextTrimming="CharacterEllipsis"/>
+                                       
+             <TextBlock FontSize="11" Foreground="#FF808080">
                                                         <Run Text="{Binding ClassName}"/>
-                                                        <Run Text="."/>
+                           
+                             <Run Text="."/>
                                                         <Run Text="{Binding MethodName}"/>
-                                                    </TextBlock>
+            
+                                        </TextBlock>
                                                 </StackPanel>
-                                                <Button Grid.Column="1" 
+            
+                                    <Button Grid.Column="1" 
                                                         Content="✏️"
-                                                        Foreground="#FF00A8E8"
-                                                        Command="{Binding DataContext.EditProfileNameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+      
+                                                  Foreground="#FF00A8E8"
+                                                  
+      Command="{Binding DataContext.EditProfileNameCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="Edit profile name">
+                                   
+                     ToolTip="Edit profile name">
                                                     <Button.Style>
-                                                        <Style TargetType="Button" BasedOn="{StaticResource DeleteButton}">
+                         
+                               <Style TargetType="Button" BasedOn="{StaticResource DeleteButton}">
                                                             <Setter Property="Foreground" Value="#FF00A8E8"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
+    
+                                                        <Style.Triggers>
+                                            
+                    <Trigger Property="IsMouseOver" Value="True">
                                                                     <Setter Property="Background" Value="#FF00A8E8"/>
-                                                                    <Setter Property="Foreground" Value="#FFFFFFFF"/>
-                                                                </Trigger>
+        
+                                                            <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                      
+                          </Trigger>
                                                             </Style.Triggers>
-                                                        </Style>
+              
+                                          </Style>
                                                     </Button.Style>
-                                                </Button>
+      
+                                          </Button>
                                                 <Button Grid.Column="2" 
-                                                        Content="✕"
-                                                        Style="{StaticResource DeleteButton}"
+        
+                                                Content="✕"
+                                                    
+    Style="{StaticResource DeleteButton}"
                                                         Command="{Binding DataContext.DeleteRecentProfileCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                                        CommandParameter="{Binding}"
+                                    
+                    CommandParameter="{Binding}"
                                                         ToolTip="Remove profile"/>
-                                            </Grid>
+                       
+                     </Grid>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
-                                </ListBox>
+   
+                             </ListBox>
 
                                 <Label Content="Injected assemblies" Style="{StaticResource ModernLabel}"/>
                                 <ListBox Style="{StaticResource ModernListBox}"
-                                         Height="90"
+ 
+                                        Height="90"
                                          ItemsSource="{Binding Path=InjectedAssemblies}" 
-                                         SelectedItem="{Binding Path=SelectedAssembly}"
+                 
+                        SelectedItem="{Binding Path=SelectedAssembly}"
                                          Margin="0,0,0,15">
-                                    <ListBox.ItemTemplate>
+                                  
+  <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Converter={StaticResource InjectedAssemblyToStringConverter}}"/>
-                                        </DataTemplate>
+           
+                             </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
 
-                                <Label Content="Namespace" Style="{StaticResource ModernLabel}"/>
+   
+                             <Label Content="Namespace" Style="{StaticResource ModernLabel}"/>
                                 <TextBox Style="{StaticResource ModernTextBox}"
-                                         Text="{Binding Path=EjectNamespace}"
+                                  
+       Text="{Binding Path=EjectNamespace}"
                                          Margin="0,0,0,15"/>
 
                                 <Label Content="Class name" Style="{StaticResource ModernLabel}"/>
-                                <TextBox Style="{StaticResource ModernTextBox}"
+               
+                 <TextBox Style="{StaticResource ModernTextBox}"
                                          Text="{Binding Path=EjectClassName}"
-                                         Margin="0,0,0,15"/>
+                                       
+  Margin="0,0,0,15"/>
 
                                 <Label Content="Method name" Style="{StaticResource ModernLabel}"/>
                                 <TextBox Style="{StaticResource ModernTextBox}"
-                                         Text="{Binding Path=EjectMethodName}"
+                            
+             Text="{Binding Path=EjectMethodName}"
                                          Margin="0,0,0,20"/>
 
                                 <Button Content="EJECT" 
-                                        Style="{StaticResource ModernButton}"
+           
+                             Style="{StaticResource ModernButton}"
                                         HorizontalAlignment="Stretch"
-                                        Command="{Binding Path=EjectCommand}"
+                              
+          Command="{Binding Path=EjectCommand}"
                                         Height="40"
                                         FontSize="14"/>
-                            </StackPanel>
+         
+                   </StackPanel>
                         </ScrollViewer>
                     </Grid>
                 </Border>
             </Grid>
 
-            <Border Grid.Row="2" 
+         
+   <Border Grid.Row="2" 
                     Background="#FF000000" 
                     CornerRadius="0,0,8,8"
                     BorderBrush="#FF3A3A3A"
                     BorderThickness="0,1,0,0">
-                <Grid Margin="15,0">
+              
+  <Grid Margin="15,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+  
+                  </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" 
                                Text="Status:" 
-                               Foreground="#FF00E676"
+                            
+   Foreground="#FF00E676"
                                FontFamily="Segoe UI"
                                FontWeight="SemiBold"
                                FontSize="12"
-                               VerticalAlignment="Center"
+   
+                            VerticalAlignment="Center"
                                Margin="0,0,10,0"/>
                     
-                    <TextBlock Grid.Column="1" 
+                    <TextBlock 
+Grid.Column="1" 
                                Text="{Binding Path=Status}"
                                Foreground="#FFFFFFFF"
                                FontFamily="Segoe UI"
-                               FontSize="12"
+    
+                           FontSize="12"
                                VerticalAlignment="Center"
                                TextTrimming="CharacterEllipsis">
-                        <TextBlock.ContextMenu>
+           
+             <TextBlock.ContextMenu>
                             <ContextMenu Background="#FF252525" BorderBrush="#FF3A3A3A">
                                 <MenuItem Header="Copy" 
-                                          Command="{Binding Path=CopyStatusCommand}"
+                       
+                   Command="{Binding Path=CopyStatusCommand}"
                                           Foreground="#FFFFFFFF"
-                                          Background="#FF252525"/>
+                                      
+    Background="#FF252525"/>
                             </ContextMenu>
                         </TextBlock.ContextMenu>
                     </TextBlock>
 
                     <TextBlock Grid.Column="2" 
-                               VerticalAlignment="Center"
+  
+                             VerticalAlignment="Center"
                                Cursor="Hand"
                                MouseLeftButtonDown="DesignerLink_Click">
-                        <TextBlock.Style>
+         
+               <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="#FF00E676"/>
-                                <Style.Triggers>
+                      
+          <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Foreground" Value="#FF00C853"/>
-                                        <Setter Property="TextDecorations" Value="Underline"/>
+          
+                              <Setter Property="TextDecorations" Value="Underline"/>
                                     </Trigger>
-                                </Style.Triggers>
+                                
+</Style.Triggers>
                             </Style>
                         </TextBlock.Style>
                         <Run Text="Design/Modificaitons by " Foreground="#FF808080"/>
-                        <Run Text="TheHolyOneZ" FontWeight="SemiBold"/>
+                    
+    <Run Text="TheHolyOneZ" FontWeight="SemiBold"/>
                     </TextBlock>
                 </Grid>
             </Border>

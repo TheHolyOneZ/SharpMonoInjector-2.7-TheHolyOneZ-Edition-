@@ -17,7 +17,7 @@ namespace SharpMonoInjector.Console
 
             if (!IsElevated)
             {                
-                System.Console.WriteLine("\r\nSharpMonoInjector 2.6 TheHolyOneZ Edition\r\n\r\nWARNING: You are running this in an unpriveleged process, try from an Elevated Command Prompt.\r\n");
+                System.Console.WriteLine("\r\nSharpMonoInjector 2.7 TheHolyOneZ Edition\r\n\r\nWARNING: You are running this in an unpriveleged process, try from an Elevated Command Prompt.\r\n");
                 System.Console.WriteLine("\t As an alternative, right-click Game .exe and uncheck the Compatibility\r\n\t setting 'Run this program as Administrator'.\r\n\r\n");
                 //System.Console.ReadKey();
                 //return;
@@ -70,7 +70,7 @@ namespace SharpMonoInjector.Console
         private static void PrintHelp()
         {
             const string help =
-                "SharpMonoInjector 2.6 TheHolyOneZ Edition\r\n\r\n" +
+                "SharpMonoInjector 2.7 TheHolyOneZ Edition\r\n\r\n" +
                 "Usage:\r\n" +
                 "smi.exe <inject/eject> <options>\r\n\r\n" +
                 "Options:\r\n" +

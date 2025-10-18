@@ -69,6 +69,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ChooseBepInExWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\LogViewerWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -104,11 +108,15 @@
     <Compile Include="Services\ConfigurationService.cs" />
     <Compile Include="Services\LoggingService.cs" />
     <Compile Include="Services\ProcessMonitorService.cs" />
+    <Compile Include="ViewModels\ChooseBepInExViewModel.cs" />
     <Compile Include="ViewModels\LogViewerViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\SelectProfileViewModel.cs" />
     <Compile Include="ViewModels\ViewModel.cs" />
+    <Compile Include="Views\ChooseBepInExWindow.xaml.cs">
+      <DependentUpon>ChooseBepInExWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LogViewerWindow.xaml.cs">
       <DependentUpon>LogViewerWindow.xaml</DependentUpon>
     </Compile>
