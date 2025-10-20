@@ -1,9 +1,10 @@
+
+---
 name: Bug Report
 about: Report a bug or unexpected behavior in SharpMonoInjector – TheHolyOneZ Edition
 title: '[BUG] '
 labels: 'bug'
 assignees: ''
-
 ---
 
 ## Describe the Bug
