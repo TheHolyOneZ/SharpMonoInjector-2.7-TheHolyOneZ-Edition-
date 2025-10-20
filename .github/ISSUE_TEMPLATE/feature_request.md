@@ -1,10 +1,12 @@
 ---
+
 name: Feature Request
 about: Suggest a new feature or improvement for SharpMonoInjector – TheHolyOneZ Edition
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
--------------
+
+---
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of the problem **specific to SharpMonoInjector**.
