@@ -1,38 +1,37 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+
+name: Bug Report
+about: Report a bug or unexpected behavior in SharpMonoInjector – TheHolyOneZ Edition
+title: '[BUG] '
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the Bug**
+A clear and concise description of the bug **related to SharpMonoInjector only**.
+*If the issue is caused by a game, mods, Unity, or external tools, it may not be addressed.*
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**Steps to Reproduce**
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+1. Launch SharpMonoInjector v2.7
+2. Select target Mono/Unity process
+3. Attempt to inject DLL
+4. Observe issue
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Expected Behavior**
+Describe what you expected to happen.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Screenshots / Logs**
+If applicable, add screenshots or paste logs from `DebugLog.txt` or `SmiReceiverLog.txt`.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+**Environment**
 
-**Additional context**
+* SharpMonoInjector Version: v2.7 – TheHolyOneZ Edition
+* OS: (e.g., Windows 10 x64)
+* Mono/Unity Version: (if known)
+* BepInEx/Thunderstore/r2modman present? (yes/no)
+
+**Additional Context**
 Add any other context about the problem here.
+*Reminder: Only issues caused by SharpMonoInjector itself will be addressed.*
