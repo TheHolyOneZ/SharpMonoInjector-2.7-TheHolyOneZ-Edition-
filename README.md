@@ -1,6 +1,7 @@
 ![License](https://img.shields.io/github/license/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![Issues](https://img.shields.io/github/issues/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+![Community Standards](https://img.shields.io/badge/Community%20Standards-Complete-brightgreen)
 
 
 # SharpMonoInjector TheHolyOneZ Edition v2.7
