@@ -1,33 +1,20 @@
 ---
-
-name: Feature Request
-about: Suggest a new feature or improvement for SharpMonoInjector – TheHolyOneZ Edition
-title: '[FEATURE] '
-labels: enhancement
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: ''
 assignees: ''
--------------
 
-## Describe the Feature
+---
 
-A clear and concise description of the feature you would like to see **specific to SharpMonoInjector**.
-*Please note: Requests related to games, mods, or third-party tools will not be considered.*
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Problem / Motivation
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-Explain why this feature is needed.
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-* What problem does it solve?
-* How does it improve the injector?
-
-## Proposed Solution / Implementation
-
-Describe your idea or suggestion:
-
-* How should it work?
-* Any specific behaviors or UI elements?
-* Optional: example screenshots or mockups.
-
-## Additional Context
-
-Add any other context or references that might help understand your request.
-*Reminder: Only injector-related features will be considered.*
+**Additional context**
+Add any other context or screenshots about the feature request here.
