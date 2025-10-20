@@ -1,3 +1,8 @@
+![License](https://img.shields.io/github/license/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+![Issues](https://img.shields.io/github/issues/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+
+
 # SharpMonoInjector TheHolyOneZ Edition v2.7
 
 A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, **Thunderstore and r2modman auto-detection**, and a **beautiful dark UI** designed for both power users and security researchers.
@@ -282,3 +287,9 @@ Retains same license as original SharpMonoInjector by Warbler.
 
 **Design, modernization, and enhancements by [TheHolyOneZ](https://github.com/TheHolyOneZ)**
 *README updated for v2.7 with Smart Router and Thunderstore integration.*
+
+
+![License](https://img.shields.io/github/license/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+![Issues](https://img.shields.io/github/issues/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
+
