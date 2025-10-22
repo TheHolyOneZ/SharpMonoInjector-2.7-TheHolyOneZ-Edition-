@@ -11,6 +11,7 @@ A **modern, fully-featured Mono assembly injector** with **advanced stealth inje
 This version builds upon **v2.6 TheHolyOneZ Edition**, retaining the complete **visual overhaul**, **stealth injection system**, **performance optimizations**, and all previous features, while introducing **Smart Injection Router**, **Receiver Auto-Detection**, and **Thunderstore integration**.
 
 
+* The images are from an older version. The newest release and source code are actually the latest, so don’t be fooled. The source code and newest release are version 2.7.
 
 Showcase: https://www.youtube.com/watch?v=SvfFgVl7a90
 ![SharpMonoInjector GUI](Images/AllWindows.png)
