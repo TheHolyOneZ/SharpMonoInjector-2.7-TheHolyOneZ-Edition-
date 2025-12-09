@@ -2,12 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Choose BepInEx Installation"
-        Height="450" Width="550"
+        Height="500" Width="600"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         Background="#FF1A1A1A"
         AllowsTransparency="True"
-        ResizeMode="NoResize">
+        ResizeMode="CanResize">
     
     <Border BorderBrush="#FF00E676" BorderThickness="2" CornerRadius="8">
         <Grid>

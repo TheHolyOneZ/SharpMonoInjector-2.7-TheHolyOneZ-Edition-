@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SharpMonoInjector.Gui.Views"
         mc:Ignorable="d"
-        Title="Process Monitor" Height="320" Width="800"
-        WindowStyle="None" 
-        ResizeMode="NoResize" 
+        Title="Process Monitor" Height="400" Width="900"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="#FF1A1A1A"
         AllowsTransparency="True">
     <Border BorderBrush="#FF00E676" BorderThickness="1" CornerRadius="8">

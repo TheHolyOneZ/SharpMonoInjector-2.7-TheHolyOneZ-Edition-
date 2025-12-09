@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace SharpMonoInjector.Gui.Models
 {
@@ -14,6 +15,7 @@ namespace SharpMonoInjector.Gui.Models
         public string EjectClassName { get; set; }
         public string EjectMethodName { get; set; }
         public bool UseStealthMode { get; set; }
+        public List<string> DependencyPaths { get; set; } = new List<string>();
         public DateTime LastUsed { get; set; }
 
         public InjectionProfile()

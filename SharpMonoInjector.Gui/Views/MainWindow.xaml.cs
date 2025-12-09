@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Principal;
@@ -6,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SharpMonoInjector.Gui.Models;
+using SharpMonoInjector.Gui.Services;
 using SharpMonoInjector.Gui.ViewModels;
 
 namespace SharpMonoInjector.Gui.Views
@@ -170,5 +172,35 @@ namespace SharpMonoInjector.Gui.Views
                 MessageBox.Show($"Failed to open log viewer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void ShowKeyboardShortcuts_Click(object sender, RoutedEventArgs e)
+        {
+            string shortcuts = "SharpMonoInjector Keyboard Shortcuts:\n\n" +
+                "Global Shortcuts:\n" +
+                "• Ctrl+O - Browse for assembly file\n" +
+                "• Ctrl+I - Open assembly inspector\n" +
+                "• Ctrl+L - Open log viewer\n" +
+                "• F5 - Inject assembly\n" +
+                "• F6 - Eject assembly\n" +
+                "• F9 - Refresh process list\n\n" +
+                "Injection Panel:\n" +
+                "• Use Browse button to select assembly\n" +
+                "• Use Inspect button to auto-populate fields\n\n" +
+                "Ejection Panel:\n" +
+                "• Select an injected assembly to eject\n" +
+                "• Use Reload button for hot-swapping [EXPERIMENTAL]\n" +
+                "• Use Force Remove for cleanup\n\n" +
+                "Process Monitor:\n" +
+                "• Add processes to watch for auto-injection\n" +
+                "• Configure per-process profiles\n" +
+                "• Enable/disable monitoring as needed\n\n" +
+                "Tip: Hover over buttons for tooltips!";
+
+            MessageBox.Show(shortcuts, "Keyboard Shortcuts & Usage Guide",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+
+
     }
 }

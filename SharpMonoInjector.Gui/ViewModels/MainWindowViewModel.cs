@@ -60,6 +60,7 @@ namespace SharpMonoInjector.Gui.ViewModels
 
             RefreshCommand = new RelayCommand(ExecuteRefreshCommand, CanExecuteRefreshCommand);
             BrowseCommand = new RelayCommand(ExecuteBrowseCommand);
+            InspectAssemblyCommand = new RelayCommand(ExecuteInspectAssemblyCommand, CanExecuteInspectAssemblyCommand);
             InjectCommand = new RelayCommand(ExecuteInjectCommand, CanExecuteInjectCommand);
             EjectCommand = new RelayCommand(ExecuteEjectCommand, CanExecuteEjectCommand);
             CopyStatusCommand = new RelayCommand(ExecuteCopyStatusCommand);
@@ -76,16 +77,24 @@ namespace SharpMonoInjector.Gui.ViewModels
             RemoveWatchProcessCommand = new RelayCommand(ExecuteRemoveWatchProcessCommand);
             SetWatchProfileCommand = new RelayCommand(ExecuteSetWatchProfileCommand);
             OpenProcessMonitorCommand = new RelayCommand(ExecuteOpenProcessMonitorCommand);
+            ReloadAssemblyCommand = new RelayCommand(ExecuteReloadAssemblyCommand, CanExecuteReloadAssemblyCommand);
+            ForceRemoveAssemblyCommand = new RelayCommand(ExecuteForceRemoveAssemblyCommand, CanExecuteForceRemoveAssemblyCommand);
+            OpenLogViewerCommand = new RelayCommand(ExecuteOpenLogViewerCommand);
+            AddDependencyPathCommand = new RelayCommand(ExecuteAddDependencyPathCommand, CanExecuteAddDependencyPathCommand);
+            RemoveDependencyPathCommand = new RelayCommand(ExecuteRemoveDependencyPathCommand);
+            BrowseDependencyPathCommand = new RelayCommand(ExecuteBrowseDependencyPathCommand);
 
             _monitorService.ProcessDetected += OnProcessDetected;
 
             LoadSettings();
+            UpdateDependencyPathsText();
         }
 
         #region[Commands]
 
         public RelayCommand RefreshCommand { get; }
         public RelayCommand BrowseCommand { get; }
+        public RelayCommand InspectAssemblyCommand { get; }
         public RelayCommand InjectCommand { get; }
         public RelayCommand EjectCommand { get; }
         public RelayCommand CopyStatusCommand { get; }
@@ -102,6 +111,12 @@ namespace SharpMonoInjector.Gui.ViewModels
         public RelayCommand RemoveWatchProcessCommand { get; }
         public RelayCommand SetWatchProfileCommand { get; }
         public RelayCommand OpenProcessMonitorCommand { get; }
+        public RelayCommand ReloadAssemblyCommand { get; }
+        public RelayCommand ForceRemoveAssemblyCommand { get; }
+        public RelayCommand OpenLogViewerCommand { get; }
+        public RelayCommand AddDependencyPathCommand { get; }
+        public RelayCommand RemoveDependencyPathCommand { get; }
+        public RelayCommand BrowseDependencyPathCommand { get; }
 
         private void ExecuteOpenProcessMonitorCommand(object parameter)
         {
@@ -162,6 +177,8 @@ namespace SharpMonoInjector.Gui.ViewModels
             EjectClassName = profile.EjectClassName;
             EjectMethodName = profile.EjectMethodName;
             UseStealthMode = profile.UseStealthMode;
+            DependencyPaths = new ObservableCollection<string>(profile.DependencyPaths ?? new List<string>());
+            UpdateDependencyPathsText();
         }
 
         private bool CanExecuteSaveProfileCommand(object parameter)
@@ -180,6 +197,9 @@ namespace SharpMonoInjector.Gui.ViewModels
                 InjectMethodName,
                 UseStealthMode
             );
+
+            // Include dependency paths in the profile
+            profile.DependencyPaths = DependencyPaths.ToList();
 
             _settings.AddRecentProfile(profile);
             _settings.LastProfile = profile;
@@ -247,23 +267,30 @@ namespace SharpMonoInjector.Gui.ViewModels
         {
             if (parameter is InjectionProfile profile)
             {
-                string newName = Interaction.InputBox(
-                    "Enter new profile name:",
-                    "Edit Profile Name",
-                    profile.Name
-                );
-
-                if (!string.IsNullOrWhiteSpace(newName))
+                try
                 {
-                    var oldName = profile.Name;
-                    profile.Name = newName;
-                    profile.LastUsed = DateTime.Now;
-                    
-                    _configService.SaveSettings(_settings);
-                    
-                    RecentProfiles = new ObservableCollection<InjectionProfile>(_settings.RecentProfiles);
-                    Status = $"Profile renamed to '{newName}'";
-                    _loggingService.Info($"Profile '{oldName}' renamed to '{newName}'", "ProfileManager");
+                    var editWindow = new SharpMonoInjector.Gui.Views.EditProfileNameWindow(profile.Name);
+                    // Set the owner window for proper focus behavior
+                    editWindow.Owner = Application.Current.MainWindow;
+                    var result = editWindow.ShowDialog();
+
+                    if (result == true && editWindow.Tag is string newName)
+                    {
+                        var oldName = profile.Name;
+                        profile.Name = newName;
+                        profile.LastUsed = DateTime.Now;
+
+                        _configService.SaveSettings(_settings);
+
+                        RecentProfiles = new ObservableCollection<InjectionProfile>(_settings.RecentProfiles);
+                        Status = $"Profile renamed to '{newName}'";
+                        _loggingService.Info($"Profile '{oldName}' renamed to '{newName}'", "ProfileManager");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _loggingService.Error($"Failed to open profile name editor: {ex.Message}", "ProfileManager");
+                    MessageBox.Show($"Failed to open profile name editor: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -368,6 +395,48 @@ namespace SharpMonoInjector.Gui.ViewModels
                 AssemblyPath = ofd.FileName;
                 _settings.AddRecentAssembly(ofd.FileName);
                 RecentAssemblies = new ObservableCollection<string>(_settings.RecentAssemblies);
+            }
+        }
+
+        private bool CanExecuteInspectAssemblyCommand(object parameter)
+        {
+            return !string.IsNullOrEmpty(AssemblyPath) && File.Exists(AssemblyPath);
+        }
+
+        private void ExecuteInspectAssemblyCommand(object parameter)
+        {
+            try
+            {
+                _loggingService.Info($"Opening assembly inspector for: {AssemblyPath}", "AssemblyInspector");
+                var inspectorWindow = new SharpMonoInjector.Gui.Views.AssemblyInspectorWindow();
+                inspectorWindow.ViewModel.AssemblyPath = AssemblyPath;
+                _loggingService.Info("Assembly inspector window created and configured", "AssemblyInspector");
+
+                var result = inspectorWindow.ShowDialog();
+                _loggingService.Info($"Assembly inspector dialog result: {result}", "AssemblyInspector");
+
+                if (result == true && inspectorWindow.ViewModel.SelectedMethod != null)
+                {
+                    // Auto-populate the injection fields
+                    var selectedClass = inspectorWindow.ViewModel.SelectedClass;
+                    var selectedMethod = inspectorWindow.ViewModel.SelectedMethod;
+
+                    InjectNamespace = selectedClass.Namespace;
+                    InjectClassName = selectedClass.Name;
+                    InjectMethodName = selectedMethod.Name;
+
+                    Status = $"Selected method: {selectedClass.FullName}.{selectedMethod.Name}";
+                    _loggingService.Success($"Auto-populated injection fields from inspector: {selectedClass.FullName}.{selectedMethod.Name}", "AssemblyInspector");
+                }
+                else
+                {
+                    _loggingService.Info("No method selected from assembly inspector", "AssemblyInspector");
+                }
+            }
+            catch (Exception ex)
+            {
+                _loggingService.Error($"Failed to open assembly inspector: {ex.Message}", "AssemblyInspector");
+                MessageBox.Show($"Failed to open assembly inspector: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -502,6 +571,166 @@ namespace SharpMonoInjector.Gui.ViewModels
             {
                 Status = "✗ Injection failed - restart game with BepInEx";
             }
+        }
+
+        private bool CanExecuteReloadAssemblyCommand(object parameter)
+        {
+            return SelectedAssembly != null;
+        }
+
+        private void ExecuteReloadAssemblyCommand(object parameter)
+        {
+            if (SelectedAssembly == null)
+            {
+                Status = "No assembly selected for reload";
+                return;
+            }
+
+            _loggingService.Info($"Starting reload for: {SelectedAssembly.Name}", "HotReload");
+
+            // Check if original file exists
+            bool originalFileExists = File.Exists(AssemblyPath);
+
+            if (!originalFileExists)
+            {
+                Status = "⚠️ Original file not found - attempting smart reload...";
+                _loggingService.Warning("Original assembly file not found, attempting alternative reload strategies", "HotReload");
+            }
+
+            try
+            {
+                byte[] file = null;
+
+                if (originalFileExists)
+                {
+                    // Use original file
+                    file = File.ReadAllBytes(AssemblyPath);
+                    _loggingService.Info("Using original assembly file for reload", "HotReload");
+                }
+                else
+                {
+                    // Try to find the file in recent assemblies
+                    foreach (string recentPath in RecentAssemblies)
+                    {
+                        if (File.Exists(recentPath) && Path.GetFileName(recentPath) == SelectedAssembly.Name)
+                        {
+                            file = File.ReadAllBytes(recentPath);
+                            _loggingService.Success($"Found alternative file for reload: {recentPath}", "HotReload");
+                            break;
+                        }
+                    }
+
+                    if (file == null)
+                    {
+                        Status = "❌ Cannot reload: No valid assembly file found";
+                        _loggingService.Error("No valid assembly file found for reload", "HotReload");
+                        return;
+                    }
+                }
+
+                // Find the injector instance for this process
+                var targetProcess = Processes.FirstOrDefault(p => p.Id == SelectedAssembly.ProcessId);
+                if (targetProcess == null)
+                {
+                    Status = "Target process not found";
+                    _loggingService.Error("Target process not found for reload", "HotReload");
+                    return;
+                }
+
+                IntPtr handle = Native.OpenProcess(ProcessAccessRights.PROCESS_ALL_ACCESS, false, targetProcess.Id);
+                if (handle == IntPtr.Zero)
+                {
+                    Status = "Failed to open target process";
+                    _loggingService.Error("Failed to open target process for reload", "HotReload");
+                    return;
+                }
+
+                ProcessUtils.GetMonoModule(handle, out IntPtr mono);
+
+                using (Injector injector = new Injector(handle, mono, _loggingService.Info))
+                {
+                    Status = "🔄 Reloading assembly...";
+                    _loggingService.Info($"Starting reload process for {SelectedAssembly.Name}", "HotReload");
+
+                    // For reload, we need to inject the new assembly
+                    // The mod's Load method should handle cleanup of the old instance
+                    try
+                    {
+                        _loggingService.Info("Injecting updated assembly for reload", "HotReload");
+                        IntPtr newAssemblyHandle = injector.Inject(file, InjectNamespace, InjectClassName, InjectMethodName);
+
+                        // Update the injected assembly info with new address
+                        var existingAssembly = InjectedAssemblies.FirstOrDefault(a => a.ProcessId == SelectedAssembly.ProcessId && a.Name == SelectedAssembly.Name);
+                        if (existingAssembly != null)
+                        {
+                            existingAssembly.Address = newAssemblyHandle;
+                            _loggingService.Success($"Updated assembly address to 0x{newAssemblyHandle.ToInt64():X}", "HotReload");
+                        }
+
+                        Status = $"✅ Reloaded {SelectedAssembly.Name}";
+                        _loggingService.Success($"Successfully reloaded {SelectedAssembly.Name}", "HotReload");
+                    }
+                    catch (InjectorException ie)
+                    {
+                        Status = $"❌ Reload failed: {ie.Message}";
+                        _loggingService.Error($"Reload injection failed: {ie.Message}", "HotReload");
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"❌ Reload failed: {ex.Message}";
+                        _loggingService.Error($"Unexpected reload error: {ex.Message}", "HotReload");
+                        return;
+                    }
+                }
+            }
+            catch (InjectorException ie)
+            {
+                Status = $"❌ Reload failed: {ie.Message}";
+                _loggingService.Error($"Reload failed: {ie.Message}", "HotReload");
+            }
+            catch (Exception ex)
+            {
+                Status = $"❌ Reload failed: {ex.Message}";
+                _loggingService.Error($"Reload failed: {ex.Message}", "HotReload");
+            }
+        }
+
+        private bool CanExecuteForceRemoveAssemblyCommand(object parameter)
+        {
+            return SelectedAssembly != null;
+        }
+
+        private void ExecuteForceRemoveAssemblyCommand(object parameter)
+        {
+            if (SelectedAssembly == null)
+            {
+                Status = "❌ No assembly selected to remove";
+                return;
+            }
+
+            string assemblyName = SelectedAssembly.Name ?? "Unknown Assembly";
+            var result = MessageBox.Show(
+                $"⚠️ Force remove '{assemblyName}' from the list?\n\n" +
+                "This will remove the assembly from SharpMonoInjector's tracking list,\n" +
+                "but the mod may still be running in the game!\n\n" +
+                "Use this only if ejection failed but you want to clean up the list.\n\n" +
+                "Continue?",
+                "Force Remove Assembly",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                InjectedAssemblies.Remove(SelectedAssembly);
+                Status = $"🗑️ Force removed: {assemblyName}";
+                _loggingService.Warning($"Force removed assembly from tracking: {assemblyName}", "Injector");
+            }
+        }
+
+        private void ExecuteOpenLogViewerCommand(object parameter)
+        {
+            // This command is handled by the routed command in the view
         }
 
         private void AttemptSingleMethod(BepInExLocation location)
@@ -884,6 +1113,7 @@ namespace SharpMonoInjector.Gui.ViewModels
 
             IsExecuting = true;
             Status = "Injecting " + Path.GetFileName(AssemblyPath);
+            InjectionProgress = 10;
 
             using (Injector injector = new Injector(handle, SelectedProcess.MonoModule, _loggingService.Info))
             {
@@ -901,6 +1131,7 @@ namespace SharpMonoInjector.Gui.ViewModels
                     _loggingService.Info("Stealth mode enabled", "Injector");
                 }
 
+                InjectionProgress = 25;
                 if (injector.IsProcessBeingDebugged())
                 {
                     Status = "WARNING: Target process is being debugged!";
@@ -908,9 +1139,62 @@ namespace SharpMonoInjector.Gui.ViewModels
                     System.Threading.Thread.Sleep(1000);
                 }
 
+                InjectionProgress = 50;
                 try
                 {
-                    IntPtr asm = injector.Inject(file, InjectNamespace, InjectClassName, InjectMethodName);
+                    IntPtr asm;
+                    if (AutoInjectDependencies)
+                    {
+                        _loggingService.Info("Dependency injection enabled", "Injector");
+
+                        // Determine search paths for dependencies
+                        var searchPaths = new List<string>();
+                        searchPaths.Add(Path.GetDirectoryName(AssemblyPath)); // Always include assembly directory
+
+                        if (DependencyPaths.Any())
+                        {
+                            _loggingService.Info($"Using custom dependency paths: {string.Join(", ", DependencyPaths)}", "Injector");
+                            searchPaths.AddRange(DependencyPaths);
+                        }
+                        else
+                        {
+                            _loggingService.Info("No custom dependency paths specified - using assembly directory only", "Injector");
+                        }
+
+                        _loggingService.Info($"Dependency search paths: {string.Join(", ", searchPaths)}", "Injector");
+
+                        InjectionProgress = 60;
+                        var dependencies = injector.GetAssemblyDependencies(AssemblyPath, searchPaths);
+                        _loggingService.Info($"Found {dependencies.Count} dependencies: {string.Join(", ", dependencies.Select(d => Path.GetFileName(d)))}", "Injector");
+
+                        if (dependencies.Any())
+                        {
+                            _loggingService.Info("Injecting with dependencies...", "Injector");
+                            injector.InjectWithDependencies(file, AssemblyPath, InjectNamespace, InjectClassName, InjectMethodName);
+                        }
+                        else
+                        {
+                            _loggingService.Info("No dependencies found - injecting main assembly only", "Injector");
+                            asm = injector.Inject(file, InjectNamespace, InjectClassName, InjectMethodName);
+                        }
+
+                        InjectionProgress = 80;
+                        // Get the main assembly handle from injector's tracking
+                        var injectedAssemblies = injector.GetInjectedAssemblies();
+                        var mainAssembly = injectedAssemblies.LastOrDefault();
+                        asm = mainAssembly?.AssemblyHandle ?? IntPtr.Zero;
+
+                        var injectedCount = injectedAssemblies.Count();
+                        _loggingService.Info($"Injection completed. Total assemblies injected: {injectedCount}", "Injector");
+                    }
+                    else
+                    {
+                        _loggingService.Info("Dependency injection disabled - injecting main assembly only", "Injector");
+                        InjectionProgress = 70;
+                        asm = injector.Inject(file, InjectNamespace, InjectClassName, InjectMethodName);
+                    }
+
+                    InjectionProgress = 90;
                     InjectedAssemblies.Add(new InjectedAssembly
                     {
                         ProcessId = SelectedProcess.Id,
@@ -918,9 +1202,10 @@ namespace SharpMonoInjector.Gui.ViewModels
                         Name = Path.GetFileName(AssemblyPath),
                         Is64Bit = injector.Is64Bit
                     });
-                    Status = "Injection successful" + (UseStealthMode ? " (STEALTH MODE)" : "");
+                    InjectionProgress = 100;
+                    Status = "Injection successful" + (UseStealthMode ? " (STEALTH MODE)" : "") + (AutoInjectDependencies ? " (WITH DEPENDENCIES)" : "");
                     _loggingService.Success($"Successfully injected {Path.GetFileName(AssemblyPath)} into {SelectedProcess.Name}", "Injector");
-                    
+
                     SaveCurrentSettings();
                     ExecuteSaveProfileCommand(null);
                 }
@@ -928,15 +1213,18 @@ namespace SharpMonoInjector.Gui.ViewModels
                 {
                     Status = "Injection failed: " + ie.Message;
                     _loggingService.Error($"Injection failed: {ie.Message}", "Injector");
+                    InjectionProgress = 0;
                 }
                 catch (Exception e)
                 {
                     Status = "Injection failed (unknown error): " + e.Message;
                     _loggingService.Error($"Injection failed (unknown): {e.Message}", "Injector");
+                    InjectionProgress = 0;
                 }
             }
 
             IsExecuting = false;
+            InjectionProgress = 0;
         }
 
         private bool CanExecuteEjectCommand(object parameter)
@@ -949,40 +1237,124 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         private void ExecuteEjectCommand(object parameter)
         {
-            _loggingService.Info($"Starting ejection: {SelectedAssembly.Name}", "Injector");
-            
-            IntPtr handle = Native.OpenProcess(ProcessAccessRights.PROCESS_ALL_ACCESS, false, SelectedAssembly.ProcessId);
-
-            if (handle == IntPtr.Zero)
+            // Extra safety check
+            if (SelectedAssembly == null)
             {
-                Status = "Failed to open process";
-                _loggingService.Error("Failed to open target process for ejection", "Injector");
+                Status = "❌ No assembly selected for ejection";
+                _loggingService.Error("SelectedAssembly is null in ExecuteEjectCommand", "Injector");
+                return;
+            }
+
+            string assemblyName = SelectedAssembly.Name ?? "Unknown Assembly";
+            _loggingService.Info($"Starting assembly ejection: {assemblyName}", "Injector");
+
+            IntPtr handle = IntPtr.Zero;
+            try
+            {
+                handle = Native.OpenProcess(ProcessAccessRights.PROCESS_ALL_ACCESS, false, SelectedAssembly.ProcessId);
+
+                if (handle == IntPtr.Zero)
+                {
+                    Status = "Failed to open process";
+                    _loggingService.Error("Failed to open target process for ejection", "Injector");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Status = $"❌ Failed to open process: {ex.Message}";
+                _loggingService.Error($"Exception opening process for ejection: {ex.Message}", "Injector");
                 return;
             }
 
             IsExecuting = true;
-            Status = "Ejecting " + SelectedAssembly.Name;
+            Status = "🔄 Ejecting assembly...";
 
-            ProcessUtils.GetMonoModule(handle, out IntPtr mono);
+            IntPtr mono = IntPtr.Zero;
+            try
+            {
+                ProcessUtils.GetMonoModule(handle, out mono);
+
+                if (mono == IntPtr.Zero)
+                {
+                    Status = "❌ Failed to get Mono module";
+                    _loggingService.Error("Failed to get Mono module for ejection", "Injector");
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Status = $"❌ Failed to get Mono module: {ex.Message}";
+                _loggingService.Error($"Exception getting Mono module: {ex.Message}", "Injector");
+                return;
+            }
 
             using (Injector injector = new Injector(handle, mono, _loggingService.Info))
             {
+                bool ejectionSuccessful = false;
+                string successfulMethod = null;
+
                 try
                 {
+                    // Primary ejection method
+                    _loggingService.Info($"Calling eject method: {EjectNamespace ?? "null"}.{EjectClassName ?? "null"}.{EjectMethodName ?? "null"}", "Injector");
+                    _loggingService.Info($"Assembly address: 0x{SelectedAssembly.Address.ToInt64():X}", "Injector");
+
                     injector.Eject(SelectedAssembly.Address, EjectNamespace, EjectClassName, EjectMethodName);
-                    InjectedAssemblies.Remove(SelectedAssembly);
-                    Status = "Ejection successful";
-                    _loggingService.Success($"Successfully ejected {SelectedAssembly.Name}", "Injector");
+                    ejectionSuccessful = true;
+                    successfulMethod = EjectMethodName;
+                    _loggingService.Success($"Assembly ejected successfully using method: {EjectMethodName}", "Injector");
+
                 }
                 catch (InjectorException ie)
                 {
-                    Status = "Ejection failed: " + ie.Message;
-                    _loggingService.Error($"Ejection failed: {ie.Message}", "Injector");
+                    _loggingService.Warning($"Primary eject method '{EjectMethodName}' failed: {ie.Message}", "Injector");
+
+                    // Try alternative methods if primary fails
+                    string[] alternativeMethods = { "Unload", "Dispose", "OnDestroy", "Cleanup", "Teardown" };
+
+                    foreach (string altMethod in alternativeMethods)
+                    {
+                        try
+                        {
+                            _loggingService.Info($"Trying alternative eject method: {altMethod}", "Injector");
+                            injector.Eject(SelectedAssembly.Address, EjectNamespace, EjectClassName, altMethod);
+                            ejectionSuccessful = true;
+                            successfulMethod = altMethod;
+                            _loggingService.Success($"Assembly ejected using alternative method: {altMethod}", "Injector");
+                            break;
+                        }
+                        catch (InjectorException altEx)
+                        {
+                            _loggingService.Warning($"Alternative method '{altMethod}' also failed: {altEx.Message}", "Injector");
+                        }
+                    }
+
+                    // Note: Emergency ejection removed - only proper unload methods count as successful
+                    // This prevents false positives where assembly appears ejected but mod is still running
+                    if (!ejectionSuccessful)
+                    {
+                        _loggingService.Error($"All ejection methods failed for {assemblyName}. Mod may still be running in game.", "Injector");
+                    }
                 }
                 catch (Exception e)
                 {
-                    Status = "Ejection failed (unknown error): " + e.Message;
-                    _loggingService.Error($"Ejection failed (unknown): {e.Message}", "Injector");
+                    _loggingService.Error($"Unexpected ejection error: {e.Message}", "Injector");
+                    Status = $"❌ Ejection failed (unexpected): {e.Message}";
+                }
+
+                // Final cleanup and status update
+                if (ejectionSuccessful)
+                {
+                    // Only remove from injected list if ejection actually succeeded
+                    InjectedAssemblies.Remove(SelectedAssembly);
+                    Status = $"✅ Assembly ejected: {assemblyName}";
+                    _loggingService.Success($"Assembly ejection completed for {assemblyName} using method: {successfulMethod}", "Injector");
+                }
+                else
+                {
+                    Status = $"❌ Ejection failed for {assemblyName}";
+                    _loggingService.Error($"All ejection methods failed for {assemblyName}", "Injector");
                 }
             }
 
@@ -1382,6 +1754,8 @@ namespace SharpMonoInjector.Gui.ViewModels
             {
                 Set(ref _selectedAssembly, value);
                 EjectCommand.RaiseCanExecuteChanged();
+                ReloadAssemblyCommand.RaiseCanExecuteChanged();
+                ForceRemoveAssemblyCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -1419,6 +1793,20 @@ namespace SharpMonoInjector.Gui.ViewModels
         {
             get => _useStealthMode;
             set => Set(ref _useStealthMode, value);
+        }
+
+        private bool _autoInjectDependencies = false;
+        public bool AutoInjectDependencies
+        {
+            get => _autoInjectDependencies;
+            set => Set(ref _autoInjectDependencies, value);
+        }
+
+        private double _injectionProgress = 0;
+        public double InjectionProgress
+        {
+            get => _injectionProgress;
+            set => Set(ref _injectionProgress, value);
         }
 
         private ObservableCollection<string> _recentAssemblies = new ObservableCollection<string>();
@@ -1491,6 +1879,61 @@ namespace SharpMonoInjector.Gui.ViewModels
         {
             get => _watchedProcesses;
             set => Set(ref _watchedProcesses, value);
+        }
+
+        private ObservableCollection<string> _dependencyPaths = new ObservableCollection<string>();
+        public ObservableCollection<string> DependencyPaths
+        {
+            get => _dependencyPaths;
+            set
+            {
+                Set(ref _dependencyPaths, value);
+                UpdateDependencyPathsText();
+            }
+        }
+
+        private string _dependencyPathsText;
+        public string DependencyPathsText
+        {
+            get => _dependencyPathsText;
+            set
+            {
+                Set(ref _dependencyPathsText, value);
+                UpdateDependencyPathsFromText();
+            }
+        }
+
+        private void UpdateDependencyPathsText()
+        {
+            DependencyPathsText = string.Join(Environment.NewLine, DependencyPaths);
+        }
+
+        private void UpdateDependencyPathsFromText()
+        {
+            if (string.IsNullOrWhiteSpace(DependencyPathsText))
+            {
+                DependencyPaths.Clear();
+            }
+            else
+            {
+                var paths = DependencyPathsText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                               .Select(p => p.Trim())
+                                               .Where(p => !string.IsNullOrEmpty(p))
+                                               .Distinct()
+                                               .ToList();
+                DependencyPaths.Clear();
+                foreach (var path in paths)
+                {
+                    DependencyPaths.Add(path);
+                }
+            }
+        }
+
+        private string _newDependencyPath;
+        public string NewDependencyPath
+        {
+            get => _newDependencyPath;
+            set => Set(ref _newDependencyPath, value);
         }
 
         #endregion
@@ -1575,6 +2018,55 @@ namespace SharpMonoInjector.Gui.ViewModels
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region[Dependency Path Commands]
+
+        private bool CanExecuteAddDependencyPathCommand(object parameter)
+        {
+            return !string.IsNullOrWhiteSpace(NewDependencyPath) && Directory.Exists(NewDependencyPath);
+        }
+
+        private void ExecuteAddDependencyPathCommand(object parameter)
+        {
+            if (string.IsNullOrWhiteSpace(NewDependencyPath) || !Directory.Exists(NewDependencyPath))
+                return;
+
+            string normalizedPath = Path.GetFullPath(NewDependencyPath);
+            if (!DependencyPaths.Contains(normalizedPath))
+            {
+                DependencyPaths.Add(normalizedPath);
+                NewDependencyPath = string.Empty;
+                Status = $"Added dependency path: {Path.GetFileName(normalizedPath)}";
+            }
+        }
+
+        private void ExecuteRemoveDependencyPathCommand(object parameter)
+        {
+            if (parameter is string path && DependencyPaths.Contains(path))
+            {
+                DependencyPaths.Remove(path);
+                Status = $"Removed dependency path: {Path.GetFileName(path)}";
+            }
+        }
+
+        private void ExecuteBrowseDependencyPathCommand(object parameter)
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.Description = "Select folder containing dependency DLLs";
+            dialog.ShowNewFolderButton = false;
+
+            if (!string.IsNullOrEmpty(NewDependencyPath) && Directory.Exists(NewDependencyPath))
+            {
+                dialog.SelectedPath = NewDependencyPath;
+            }
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                NewDependencyPath = dialog.SelectedPath;
+            }
         }
 
         #endregion

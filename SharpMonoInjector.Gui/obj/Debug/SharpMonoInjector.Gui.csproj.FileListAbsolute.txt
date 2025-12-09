@@ -1,0 +1,3 @@
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Debug\SharpMonoInjector.Gui.csproj.AssemblyReference.cache
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Debug\SharpMonoInjector.Gui.Properties.Resources.resources
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Debug\SharpMonoInjector.Gui.csproj.GenerateResource.cache

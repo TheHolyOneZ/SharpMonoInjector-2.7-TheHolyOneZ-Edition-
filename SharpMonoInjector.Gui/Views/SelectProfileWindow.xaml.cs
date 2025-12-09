@@ -21,5 +21,11 @@ namespace SharpMonoInjector.Gui.Views
         {
             this.Close();
         }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
     }
 }
