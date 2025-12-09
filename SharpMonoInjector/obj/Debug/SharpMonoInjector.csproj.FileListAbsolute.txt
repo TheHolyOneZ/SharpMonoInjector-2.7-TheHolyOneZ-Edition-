@@ -1,0 +1,6 @@
+C:\Users\etien\Documents\SharpMonoInjector\build\Debug\SharpMonoInjector.dll
+C:\Users\etien\Documents\SharpMonoInjector\build\Debug\SharpMonoInjector.pdb
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector\obj\Debug\SharpMonoInjector.csproj.AssemblyReference.cache
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector\obj\Debug\SharpMonoInjector.csproj.CoreCompileInputs.cache
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector\obj\Debug\SharpMonoInjector.dll
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector\obj\Debug\SharpMonoInjector.pdb

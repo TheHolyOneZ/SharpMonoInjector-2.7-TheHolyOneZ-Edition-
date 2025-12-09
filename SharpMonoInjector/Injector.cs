@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.IO;
+using System.Reflection;
 
 namespace SharpMonoInjector
 {
@@ -18,6 +20,17 @@ namespace SharpMonoInjector
         public int DelayMs { get; set; } = 100;
         internal bool PerformAntiDebugChecks { get; set; } = false;
         internal bool PerformVmCheck { get; set; } = false;
+    }
+
+    public class InjectedAssemblyInfo
+    {
+        public IntPtr AssemblyHandle { get; set; }
+        public string AssemblyName { get; set; }
+        public string Namespace { get; set; }
+        public string ClassName { get; set; }
+        public string LoadMethodName { get; set; }
+        public string UnloadMethodName { get; set; }
+        public DateTime InjectionTime { get; set; }
     }
 
     public class Injector : IDisposable
@@ -60,6 +73,7 @@ namespace SharpMonoInjector
         private Random _random = new Random();
         private readonly Action<string, string> _logInfo;
         private int _nopCount = 0;
+        private readonly Dictionary<string, InjectedAssemblyInfo> _injectedAssemblies = new Dictionary<string, InjectedAssemblyInfo>();
 
         public bool Is64Bit { get; private set; }
         public InjectionOptions Options
@@ -400,6 +414,20 @@ namespace SharpMonoInjector
             @class = GetClassFromName(image, @namespace, className);
             method = GetMethodFromName(@class, methodName);
             RuntimeInvoke(method);
+
+            // Store injection info for potential reloading
+            string assemblyKey = $"{@namespace}.{className}";
+            _injectedAssemblies[assemblyKey] = new InjectedAssemblyInfo
+            {
+                AssemblyHandle = assembly,
+                AssemblyName = $"{@namespace}.{className}",
+                Namespace = @namespace,
+                ClassName = className,
+                LoadMethodName = methodName,
+                UnloadMethodName = methodName == "Load" ? "Unload" : null,
+                InjectionTime = DateTime.Now
+            };
+
             return assembly;
         }
 
@@ -418,6 +446,156 @@ namespace SharpMonoInjector
             method = GetMethodFromName(@class, methodName);
             RuntimeInvoke(method);
             CloseAssembly(assembly);
+
+            // Remove from tracking
+            string assemblyKey = $"{@namespace}.{className}";
+            _injectedAssemblies.Remove(assemblyKey);
+        }
+
+        public IntPtr Reload(byte[] newAssembly, string @namespace, string className, string loadMethodName, string unloadMethodName = null)
+        {
+            string assemblyKey = $"{@namespace}.{className}";
+
+            if (!_injectedAssemblies.ContainsKey(assemblyKey))
+            {
+                throw new InjectorException($"Assembly {assemblyKey} is not currently injected. Cannot reload.");
+            }
+
+            var existingInfo = _injectedAssemblies[assemblyKey];
+
+            _logInfo?.Invoke($"Starting hot reload for {assemblyKey}", "HotReload");
+
+            // Try to unload the existing assembly
+            if (!string.IsNullOrEmpty(unloadMethodName))
+            {
+                try
+                {
+                    _logInfo?.Invoke($"Calling unload method: {unloadMethodName}", "HotReload");
+                    Eject(existingInfo.AssemblyHandle, @namespace, className, unloadMethodName);
+                }
+                catch (Exception ex)
+                {
+                    _logInfo?.Invoke($"Warning: Unload method failed: {ex.Message}. Continuing with reload.", "HotReload");
+                }
+            }
+            else
+            {
+                _logInfo?.Invoke("No unload method specified, skipping unload step", "HotReload");
+            }
+
+            // Inject the new assembly
+            _logInfo?.Invoke($"Injecting updated assembly", "HotReload");
+            IntPtr newAssemblyHandle = Inject(newAssembly, @namespace, className, loadMethodName);
+
+            _logInfo?.Invoke($"Hot reload completed successfully for {assemblyKey}", "HotReload");
+            return newAssemblyHandle;
+        }
+
+        public IEnumerable<InjectedAssemblyInfo> GetInjectedAssemblies()
+        {
+            return _injectedAssemblies.Values;
+        }
+
+        public List<string> GetAssemblyDependencies(string assemblyPath, List<string> customPaths = null)
+        {
+            var dependencies = new List<string>();
+
+            try
+            {
+                var assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
+                var searchPaths = new List<string>();
+
+                // Always include the main assembly directory
+                searchPaths.Add(Path.GetDirectoryName(assemblyPath));
+
+                // Add user-specified custom paths
+                if (customPaths != null)
+                {
+                    searchPaths.AddRange(customPaths.Where(p => Directory.Exists(p)));
+                }
+
+                // Add common Unity/Mono directories for automatic discovery
+                var unityCachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity", "cache");
+                if (Directory.Exists(unityCachePath))
+                    searchPaths.Add(unityCachePath);
+
+                foreach (var reference in assembly.GetReferencedAssemblies())
+                {
+                    string foundPath = null;
+
+                    // Try each search path in order
+                    foreach (var searchPath in searchPaths)
+                    {
+                        var testPath = Path.Combine(searchPath, reference.Name + ".dll");
+                        if (File.Exists(testPath))
+                        {
+                            foundPath = testPath;
+                            break; // Found it, stop searching
+                        }
+                    }
+
+                    if (foundPath != null)
+                    {
+                        dependencies.Add(foundPath);
+                        _logInfo?.Invoke($"Found dependency: {reference.Name}.dll -> {Path.GetFileName(Path.GetDirectoryName(foundPath))}", "DependencyResolution");
+                    }
+                    else
+                    {
+                        _logInfo?.Invoke($"Dependency not found in any search path: {reference.Name}.dll", "DependencyResolution");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logInfo?.Invoke($"Failed to scan dependencies for {Path.GetFileName(assemblyPath)}: {ex.Message}", "DependencyResolution");
+            }
+
+            return dependencies;
+        }
+
+        public void InjectWithDependencies(byte[] rawAssembly, string assemblyPath, string @namespace, string className, string methodName, List<string> customPaths = null)
+        {
+            _logInfo?.Invoke("Scanning for assembly dependencies...", "DependencyResolution");
+
+            var dependencies = GetAssemblyDependencies(assemblyPath, customPaths);
+            var injectedDependencies = new List<IntPtr>();
+
+            if (dependencies.Count > 0)
+            {
+                _logInfo?.Invoke($"Found {dependencies.Count} dependencies to inject", "DependencyResolution");
+
+                // Inject dependencies first
+                foreach (var depPath in dependencies)
+                {
+                    try
+                    {
+                        var depName = Path.GetFileNameWithoutExtension(depPath);
+                        _logInfo?.Invoke($"Injecting dependency: {depName}", "DependencyResolution");
+
+                        var depAssembly = File.ReadAllBytes(depPath);
+                        // For dependencies, we don't call any methods, just load them
+                        var depHandle = Inject(depAssembly, "", "", "");
+                        injectedDependencies.Add(depHandle);
+
+                        _logInfo?.Invoke($"Successfully injected dependency: {depName}", "DependencyResolution");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logInfo?.Invoke($"Failed to inject dependency {Path.GetFileName(depPath)}: {ex.Message}", "DependencyResolution");
+                        // Continue with main assembly even if dependency fails
+                    }
+                }
+            }
+            else
+            {
+                _logInfo?.Invoke("No dependencies found for this assembly", "DependencyResolution");
+            }
+
+            // Inject main assembly
+            _logInfo?.Invoke("Injecting main assembly...", "DependencyResolution");
+            Inject(rawAssembly, @namespace, className, methodName);
+
+            _logInfo?.Invoke($"Injection with dependencies completed. Injected {injectedDependencies.Count} dependencies.", "DependencyResolution");
         }
 
         private static void ThrowIfNull(IntPtr ptr, string methodName) { if (ptr == IntPtr.Zero) throw new InjectorException($"{methodName}() returned NULL"); }
