@@ -4,11 +4,11 @@
 ![Community Standards](https://img.shields.io/badge/Community%20Standards-Complete-brightgreen)
 
 
-# SharpMonoInjector TheHolyOneZ Edition v2.7
+# SharpMonoInjector TheHolyOneZ Edition v2.7.1
 
 A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, **Thunderstore and r2modman auto-detection**, and a **beautiful dark UI** designed for both power users and security researchers.
 
-This version builds upon **v2.6 TheHolyOneZ Edition**, retaining the complete **visual overhaul**, **stealth injection system**, **performance optimizations**, and all previous features, while introducing **Smart Injection Router**, **Receiver Auto-Detection**, and **Thunderstore integration**.
+This version builds upon **v2.7 TheHolyOneZ Edition**, retaining all previous features, while introducing **keybinds**, **inspector**, **reload and force remove buttons**, **auto-inject dependencies**, and **profile integration improvements**.
 
 
 * The images are from an older version. The newest release and source code are actually the latest, so don’t be fooled. The source code and newest release are version 2.7.
@@ -25,7 +25,7 @@ Both **x86** and **x64** architectures are supported.
 
 ---
 
-## 🆕 What's New in v2.7 (Latest Release)
+## 🆕 What's New in v2.7.1 (Latest Release)
 
 ### 🚀 Major Additions
 
@@ -62,6 +62,37 @@ Both **x86** and **x64** architectures are supported.
 * Improved error recovery when pipe communication fails.
 * Thunderstore paths now properly scanned under AppData.
 * Router remembers last successful injection path per game.
+
+#### ⌨️ Keybinds
+
+* Keyboard shortcuts for common actions to improve workflow efficiency.
+
+#### 🔍 Inspector
+
+* Built-in assembly inspector for examining loaded assemblies and their contents.
+
+#### 🔧 Fixed Eject Button
+
+* Resolved issues with the eject functionality for better reliability.
+
+#### 🔄 Reload and Force Remove Buttons
+
+* Reload button to refresh injected assemblies without restarting the process.
+* Force remove button to forcibly eject assemblies if needed.
+
+#### 📁 Profile Management Enhancements
+
+* Moved saved profiles from eject side to inject side for better organization.
+* Redesigned the saved profiles UI with improved layout.
+* Enhanced edit name profile UI for easier profile management.
+
+#### 📦 Auto-Inject Dependencies
+
+* Toggle button for automatic dependency injection.
+* Custom dependencies paths support:
+  * If auto-inject is enabled but no custom path is set, dependencies are searched in the same folder as the selected DLL.
+  * If a custom path is specified, dependencies are loaded from that folder.
+* All new fields and options are saved via profile, fully integrated with the profile system.
 
 ---
 
@@ -133,6 +164,81 @@ Injection successful (STEALTH MODE)
 
 * The GUI automatically requests elevation when needed.
 * If denied, a prompt explains manual restart requirements.
+
+---
+
+## 🎛️ User Interface Overview
+
+### Main Window Layout
+
+The main window is divided into two primary sections: **INJECT** (left) and **EJECT** (right), providing a clear separation of injection and ejection operations.
+
+#### INJECT Section
+
+* **Process Selection:** Dropdown list of running processes with refresh button (F9)
+* **Assembly Input:** Text field for DLL path with browse button (Ctrl+O) and inspect button (Ctrl+I)
+* **Recent Assemblies:** List of previously used assemblies with quick selection and removal options
+* **Saved Profiles:** Enhanced profile management with detailed cards showing profile info, edit name (✏️), and delete (🗑️) buttons
+* **Injection Fields:** Namespace, Class, Method name inputs
+* **Stealth Mode:** Toggle for advanced injection options
+* **Auto-Inject Dependencies:** Toggle with custom dependency paths (one per line)
+* **Profile Management:** Save current settings as profile or clear all recents
+
+#### EJECT Section
+
+* **Injected Assemblies:** List of currently loaded assemblies
+* **Ejection Fields:** Namespace, Class, Method inputs for unload
+* **Action Buttons:** RELOAD (🔄) for hot-swapping, EJECT for standard removal, FORCE REMOVE (🗑️) for problematic assemblies
+
+#### Status Bar
+
+* Real-time status updates with progress bar during operations
+* Context menu for copying status text
+* Credits link to developer
+
+### Keyboard Shortcuts
+
+The application supports the following keyboard shortcuts for efficient operation:
+
+| Shortcut | Action | Description |
+|----------|--------|-------------|
+| **Ctrl+O** | Browse for assembly file | Opens file dialog to select DLL/EXE assembly |
+| **Ctrl+I** | Open assembly inspector | Launches the assembly introspection tool |
+| **F5** | Inject assembly | Executes injection with current settings |
+| **F6** | Eject assembly | Removes injected assembly using current settings |
+| **F9** | Refresh process list | Updates the dropdown with currently running processes |
+| **Ctrl+L** | Open log viewer | Displays the comprehensive logging interface |
+
+### Inspector Tool
+
+The Assembly Inspector (Ctrl+I) provides deep introspection of .NET assemblies:
+
+* **Load Assembly:** Enter or browse to DLL path and load for analysis
+* **Namespace Browser:** Hierarchical view of all namespaces in the assembly
+* **Class Explorer:** Detailed class information with full names and inheritance
+* **Method Inspector:** Complete method signatures, return types, and parameters
+* **Auto-Population:** "Select Method" button automatically fills injection fields in main window
+
+### Process Monitor
+
+The Process Monitor (⚡ button) enables automated injection workflows:
+
+* **Watch List:** Add processes by name to monitor for appearance
+* **Profile Assignment:** Assign specific injection profiles to watched processes
+* **Auto-Injection:** Toggle automatic injection when target processes start
+* **Notifications:** Desktop alerts when monitored processes are detected
+* **Mono Game Filter:** Option to scan only for Unity/Mono-based applications
+* **Background Monitoring:** Continuous process scanning with configurable intervals
+
+### Log Viewer
+
+The Log Viewer (📋 button or Ctrl+L) provides comprehensive logging and debugging:
+
+* **Real-time Logs:** Color-coded entries with timestamps and severity levels
+* **Search & Filter:** Full-text search and level-based filtering (Info, Success, Warning, Error)
+* **Export Functionality:** Save logs to file for analysis
+* **Context Actions:** Right-click menu for copying individual log entries
+* **Persistent Storage:** Logs saved to DebugLog.txt for session continuity
 
 ---
 
@@ -236,6 +342,20 @@ YourGame/BepInEx/plugins/SharpMonoInjectorTheHolyOneZEdition.dll
 
 ## 🧾 Version History
 
+### v2.7.1
+
+* Added comprehensive keybinds for improved workflow efficiency
+* Assembly Inspector tool for deep introspection of .NET assemblies
+* Fixed eject button functionality for reliable assembly removal
+* Added reload and force remove buttons for advanced ejection options
+* Moved saved profiles to inject side with redesigned UI and enhanced profile cards
+* Enhanced edit name profile UI with improved user experience
+* Auto-inject dependencies toggle with custom paths support (searches same folder if no custom paths set)
+* Profile system integration for all new fields and options
+* Process Monitor with automated injection workflows and background monitoring
+* Enhanced Log Viewer with search, filtering, and export capabilities
+* Improved UI layout with better organization and visual hierarchy
+
 ### v2.7
 
 * Smart Injection Router with auto-detection
@@ -288,10 +408,9 @@ Retains same license as original SharpMonoInjector by Warbler.
 ---
 
 **Design, modernization, and enhancements by [TheHolyOneZ](https://github.com/TheHolyOneZ)**
-*README updated for v2.7 with Smart Router and Thunderstore integration.*
+*README updated for v2.7.1 with comprehensive UI overview, keybinds, inspector tool, process monitor, enhanced log viewer, auto-inject dependencies, and profile system improvements.*
 
 
 ![License](https://img.shields.io/github/license/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![Issues](https://img.shields.io/github/issues/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
-
