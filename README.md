@@ -391,7 +391,7 @@ YourGame/BepInEx/plugins/SharpMonoInjectorTheHolyOneZEdition.dll
 
 ## 👥 Credits
 
-* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, automation, Smart Router, and Thunderstore integration
+* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, automation, Smart Router,keybinds, inspector tool and Thunderstore integration
 * **wh0am1** – Bug fixes and original modernization ([UnknownCheats Thread](https://www.unknowncheats.me/forum/unity/408878-sharpmonoinjector-fixed-updated.html))
 * **Warbler** – Original SharpMonoInjector creator ([GitHub](https://github.com/warbler/SharpMonoInjector))
 
