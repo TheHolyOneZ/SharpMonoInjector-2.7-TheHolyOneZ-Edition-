@@ -3,7 +3,8 @@
 ![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![Community Standards](https://img.shields.io/badge/Community%20Standards-Complete-brightgreen)
 
-> Small info in the source code: there may be comments that look out of place or say "fix" or whatever. These are leftovers from me. I have been working on this for weeks because I didn't have time, so some days I didn't work on it and needed to know what I did and what not.
+> Some comments in the source code (e.g. "fix", TODOs) are leftover development notes and can be ignored — most have already been addressed.
+
 
 
 # SharpMonoInjector TheHolyOneZ Edition v2.7.1
