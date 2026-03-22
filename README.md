@@ -3,15 +3,12 @@
 ![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![Community Standards](https://img.shields.io/badge/Community%20Standards-Complete-brightgreen)
 
-> Some comments in the source code (e.g. "fix", TODOs) are leftover development notes and can be ignored — most have already been addressed.
 
-
-
-# SharpMonoInjector TheHolyOneZ Edition v2.7.1
+# SharpMonoInjector TheHolyOneZ Edition v2.8.0
 
 A **modern, fully-featured Mono assembly injector** with **advanced stealth injection**, **real-time logging**, **profile management**, **Thunderstore and r2modman auto-detection**, and a **beautiful dark UI** designed for both power users and security researchers.
 
-This version builds upon **v2.7 TheHolyOneZ Edition**, retaining all previous features, while introducing **keybinds**, **inspector**, **reload and force remove buttons**, **auto-inject dependencies**, and **profile integration improvements**.
+This version builds upon **v2.7.5 TheHolyOneZ Edition**, retaining all previous features, while introducing an **injection delay slider**, **system tray icon**, **auto-refresh process list**, **process status indicators**, **assembly version display**, plus fixes for panel scrolling, injection field validation feedback, and auto-refresh reliability.
 
 
 * The images are from an older version. The newest release and source code are actually the latest, so don’t be fooled. The source code and newest release are version 2.7.
@@ -28,7 +25,27 @@ Both **x86** and **x64** architectures are supported.
 
 ---
 
-## 🆕 What's New in v2.7.1 (Latest Release)
+## 🆕 What's New in v2.8.0 (Latest Release)
+
+### New Features
+- **Injection delay slider** — Set a 0–5000 ms delay before injection. Useful for games that need a moment to finish loading Mono.
+- **System tray icon** — Minimize to tray. Double-click to restore, right-click for quick inject or exit.
+- **Auto-refresh process list** — Enable a 5–60 s background scan timer so newly launched games appear automatically.
+- **Process status dots** — Green/red indicator next to each process, polled every 3 seconds.
+- **Assembly version display** — Version and architecture shown below the DLL path after selection.
+
+### Bug Fixes
+- **Panel scrolling** — Mouse wheel now works anywhere over the inject panel, not just on the scrollbar.
+- **Validation feedback** — Class/Method fields highlight red and show "Required" only after clicking Inject, with a status bar message naming the missing field.
+- **Auto-refresh reliability** — Uses the same scan path as the manual Refresh button.
+- **Dependency injection crash** — `InjectWithDependencies` no longer passes empty strings to `Inject()`.
+- **Log rotation** — `DebugLog.txt` capped at 5 MB, rotated to `.old.txt`.
+- **Right-click → Copy Path** on recent assembly entries.
+- **Confirmation before Clear All**.
+
+---
+
+## What's New in v2.7.1
 
 ### 🚀 Major Additions
 
@@ -392,7 +409,7 @@ YourGame/BepInEx/plugins/SharpMonoInjectorTheHolyOneZEdition.dll
 
 ## 👥 Credits
 
-* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, automation, Smart Router,keybinds, inspector tool and Thunderstore integration
+* **TheHolyOneZ** – Visual overhaul, stealth system, UI redesign, logging, profiles, automation, Smart Router, and Thunderstore integration
 * **wh0am1** – Bug fixes and original modernization ([UnknownCheats Thread](https://www.unknowncheats.me/forum/unity/408878-sharpmonoinjector-fixed-updated.html))
 * **Warbler** – Original SharpMonoInjector creator ([GitHub](https://github.com/warbler/SharpMonoInjector))
 
