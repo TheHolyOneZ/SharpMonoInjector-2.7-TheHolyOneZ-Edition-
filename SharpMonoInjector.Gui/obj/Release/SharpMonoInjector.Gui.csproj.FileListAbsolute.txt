@@ -25,7 +25,6 @@ C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\Sha
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\SharpMon.C9DE6B73.Up2Date
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\smi_gui.exe
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\smi_gui.pdb
-C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\smi_gui.exe.config
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\Views\AssemblyInspectorWindow.g.cs
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\Views\AssemblyInspectorWindow.baml
 C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Gui\obj\Release\Views\EditProfileNameWindow.baml

@@ -367,12 +367,26 @@ namespace SharpMonoInjector
         }
 
 
+        // Loads a dependency assembly into the Mono runtime without invoking any method.
+        public IntPtr LoadAssemblyOnly(byte[] rawAssembly)
+        {
+            if (rawAssembly == null) throw new ArgumentNullException(nameof(rawAssembly));
+            if (rawAssembly.Length == 0) throw new ArgumentException($"{nameof(rawAssembly)} cannot be empty", nameof(rawAssembly));
+
+            ObtainMonoExports();
+            _rootDomain = GetRootDomain();
+            IntPtr rawImage = OpenImageFromData(rawAssembly);
+            _attach = true;
+            IntPtr assembly = OpenAssemblyFromImage(rawImage);
+            return assembly;
+        }
+
         public IntPtr Inject(byte[] rawAssembly, string @namespace, string className, string methodName)
         {
             if (rawAssembly == null) throw new ArgumentNullException(nameof(rawAssembly));
             if (rawAssembly.Length == 0) throw new ArgumentException($"{nameof(rawAssembly)} cannot be empty", nameof(rawAssembly));
-            if (className == null) throw new ArgumentNullException(nameof(className));
-            if (methodName == null) throw new ArgumentNullException(nameof(methodName));
+            if (string.IsNullOrWhiteSpace(className)) throw new ArgumentException($"{nameof(className)} cannot be null or empty", nameof(className));
+            if (string.IsNullOrWhiteSpace(methodName)) throw new ArgumentException($"{nameof(methodName)} cannot be null or empty", nameof(methodName));
 
              bool runStealthChecks = Options.DelayExecution || Options.HideThreads || Options.RandomizeMemory || Options.ObfuscateCode;
              Options.PerformAntiDebugChecks = runStealthChecks;
@@ -573,8 +587,8 @@ namespace SharpMonoInjector
                         _logInfo?.Invoke($"Injecting dependency: {depName}", "DependencyResolution");
 
                         var depAssembly = File.ReadAllBytes(depPath);
-                        // For dependencies, we don't call any methods, just load them
-                        var depHandle = Inject(depAssembly, "", "", "");
+                        // For dependencies, we only load them — no method invocation
+                        var depHandle = LoadAssemblyOnly(depAssembly);
                         injectedDependencies.Add(depHandle);
 
                         _logInfo?.Invoke($"Successfully injected dependency: {depName}", "DependencyResolution");

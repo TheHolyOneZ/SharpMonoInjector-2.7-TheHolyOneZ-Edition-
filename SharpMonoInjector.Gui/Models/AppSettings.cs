@@ -18,6 +18,9 @@ namespace SharpMonoInjector.Gui.Models
         public string LastProcessName { get; set; }
         public WindowSettings WindowSettings { get; set; } = new WindowSettings();
         public ProcessMonitorSettings MonitorSettings { get; set; } = new ProcessMonitorSettings();
+        public int InjectionDelayMs { get; set; } = 0;
+        public bool AutoRefreshEnabled { get; set; } = false;
+        public int AutoRefreshIntervalSecs { get; set; } = 10;
 
         public void AddRecentAssembly(string path)
         {

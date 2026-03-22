@@ -11,10 +11,10 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Thumb}">
-                    <Border x:Name="ThumbBorder" 
-                            Background="#FF00E676" 
-                            CornerRadius="4"
-                            Margin="2"/>
+                    <Border x:Name="ThumbBorder"
+                            Background="#FF00E676"
+                            CornerRadius="3"
+                            Margin="1"/>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ThumbBorder" Property="Background" Value="#FF00C853"/>
@@ -48,12 +48,12 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Border Background="{TemplateBinding Background}" 
-                              CornerRadius="4"
-                              Margin="4,0,0,0"/>
-                        <Track x:Name="PART_Track" 
+                        <Border Background="{TemplateBinding Background}"
+                              CornerRadius="3"
+                              Margin="2,0,0,0"/>
+                        <Track x:Name="PART_Track"
                                IsDirectionReversed="True"
-                               Margin="4,4,0,4">
+                               Margin="2,3,0,3">
                             <Track.DecreaseRepeatButton>
                                 <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageUpCommand"/>
                             </Track.DecreaseRepeatButton>
@@ -70,18 +70,18 @@
         </Setter>
         <Style.Triggers>
             <Trigger Property="Orientation" Value="Horizontal">
-                <Setter Property="Height" Value="12"/>
-                <Setter Property="MinHeight" Value="12"/>
+                <Setter Property="Height" Value="8"/>
+                <Setter Property="MinHeight" Value="8"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ScrollBar}">
                             <Grid>
-                                <Border Background="{TemplateBinding Background}" 
-                                      CornerRadius="4"
-                                      Margin="0,4,0,0"/>
-                                <Track x:Name="PART_Track" 
+                                <Border Background="{TemplateBinding Background}"
+                                      CornerRadius="3"
+                                      Margin="0,2,0,0"/>
+                                <Track x:Name="PART_Track"
                                        IsDirectionReversed="False"
-                                       Margin="4,4,4,0">
+                                       Margin="3,2,3,0">
                                     <Track.DecreaseRepeatButton>
                                         <RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageLeftCommand"/>
                                     </Track.DecreaseRepeatButton>
@@ -98,8 +98,8 @@
                 </Setter>
             </Trigger>
             <Trigger Property="Orientation" Value="Vertical">
-                <Setter Property="Width" Value="12"/>
-                <Setter Property="MinWidth" Value="12"/>
+                <Setter Property="Width" Value="8"/>
+                <Setter Property="MinWidth" Value="8"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -108,16 +108,17 @@
         <Setter Property="Background" Value="#FF00E676"/>
         <Setter Property="Foreground" Value="#FF000000"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="20,10"/>
+        <Setter Property="Padding" Value="12,6"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="border" 
-                            Background="{TemplateBinding Background}" 
-                            CornerRadius="4"
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="3"
                             BorderThickness="0">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -143,19 +144,20 @@
         <Setter Property="Foreground" Value="#FF00E676"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="#FF00E676"/>
-        <Setter Property="Padding" Value="20,10"/>
+        <Setter Property="Padding" Value="12,6"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="MinWidth" Value="90"/>
+        <Setter Property="MinWidth" Value="70"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="border" 
-                            Background="{TemplateBinding Background}" 
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="3">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -176,17 +178,17 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#FFFF4444"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Width" Value="24"/>
-        <Setter Property="Height" Value="24"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Width" Value="18"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <Border x:Name="border" 
-                            Background="{TemplateBinding Background}" 
-                            CornerRadius="12"
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="9"
                             BorderThickness="0">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
@@ -203,21 +205,21 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="SettingsButton" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#FF00A8E8"/>
         <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Width" Value="25"/>
-        <Setter Property="Height" Value="25"/>
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="20"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="3">
                         <TextBlock Text="{TemplateBinding Content}"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Center"
@@ -239,9 +241,9 @@
         <Setter Property="Foreground" Value="#FFFFFFFF"/>
         <Setter Property="BorderBrush" Value="#FF3A3A3A"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Padding" Value="6,4"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBox}">
@@ -249,7 +251,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="3">
                         <ScrollViewer x:Name="PART_ContentHost"
                                       Margin="{TemplateBinding Padding}"
                                       Focusable="False"
@@ -275,22 +277,22 @@
         <Setter Property="Foreground" Value="#FFFFFFFF"/>
         <Setter Property="BorderBrush" Value="#FF3A3A3A"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Padding" Value="6,4"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBox}">
                     <Grid>
-                        <Border x:Name="border" 
-                                Background="{TemplateBinding Background}" 
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
+                                CornerRadius="3">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
-                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="22"/>
                                 </Grid.ColumnDefinitions>
                                 <ContentPresenter Grid.Column="0"
                                                   Content="{TemplateBinding SelectionBoxItem}"
@@ -300,9 +302,9 @@
                                                   HorizontalAlignment="Left"
                                                   VerticalAlignment="Center"
                                                   IsHitTestVisible="False"/>
-                                <Path Grid.Column="1" 
+                                <Path Grid.Column="1"
                                       x:Name="arrow"
-                                      Data="M 0 0 L 4 4 L 8 0 Z" 
+                                      Data="M 0 0 L 4 4 L 8 0 Z"
                                       Fill="#FF00E676"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
@@ -312,13 +314,13 @@
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                Placement="Bottom"
                                AllowsTransparency="True">
-                            <Border Background="#FF252525" 
+                            <Border Background="#FF252525"
                                     BorderBrush="#FF3A3A3A"
                                     BorderThickness="1"
-                                    CornerRadius="4"
+                                    CornerRadius="3"
                                     Margin="0,2,0,0"
                                     MinWidth="{TemplateBinding ActualWidth}">
-                                <ScrollViewer MaxHeight="200">
+                                <ScrollViewer MaxHeight="180">
                                     <ItemsPresenter/>
                                 </ScrollViewer>
                             </Border>
@@ -340,19 +342,19 @@
         <Setter Property="BorderBrush" Value="#FF3A3A3A"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListBox}">
-                    <Border x:Name="border" 
-                            Background="{TemplateBinding Background}" 
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                        <ScrollViewer Focusable="False" Padding="2,2,8,2">
+                            CornerRadius="3">
+                        <ScrollViewer Focusable="False" Padding="2,2,6,2">
                             <ScrollViewer.Resources>
                                 <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ModernScrollBar}"/>
                             </ScrollViewer.Resources>
@@ -366,15 +368,15 @@
             <Setter.Value>
                 <Style TargetType="{x:Type ListBoxItem}">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Padding" Value="10,6"/>
+                    <Setter Property="Padding" Value="6,3"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                <Border x:Name="border" 
+                                <Border x:Name="border"
                                         Background="{TemplateBinding Background}"
                                         Padding="{TemplateBinding Padding}"
-                                        Margin="2"
-                                        CornerRadius="3">
+                                        Margin="1"
+                                        CornerRadius="2">
                                     <ContentPresenter/>
                                 </Border>
                                 <ControlTemplate.Triggers>
@@ -397,41 +399,41 @@
     <Style x:Key="ModernLabel" TargetType="{x:Type Label}">
         <Setter Property="Foreground" Value="#FFB0B0B0"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Padding" Value="0,0,0,5"/>
+        <Setter Property="Padding" Value="0,0,0,3"/>
     </Style>
 
     <Style x:Key="TitleLabel" TargetType="{x:Type Label}">
         <Setter Property="Foreground" Value="#FF00E676"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Padding" Value="0,0,0,10"/>
+        <Setter Property="Padding" Value="0,0,0,6"/>
     </Style>
 
     <Style x:Key="ModernCheckBox" TargetType="{x:Type CheckBox}">
         <Setter Property="Foreground" Value="#FFFFFFFF"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
                     <StackPanel Orientation="Horizontal">
-                        <Border x:Name="border" 
-                                Width="20" Height="20"
+                        <Border x:Name="border"
+                                Width="15" Height="15"
                                 Background="#FF252525"
                                 BorderBrush="#FF3A3A3A"
                                 BorderThickness="1"
-                                CornerRadius="3"
-                                Margin="0,0,10,0">
+                                CornerRadius="2"
+                                Margin="0,0,6,0">
                             <Path x:Name="check"
-                                  Data="M 0 5 L 5 10 L 15 0"
+                                  Data="M 0 4 L 4 8 L 12 0"
                                   Stroke="#FF00E676"
                                   StrokeThickness="2"
                                   Visibility="Collapsed"
-                                  Margin="2"/>
+                                  Margin="1"/>
                         </Border>
                         <ContentPresenter VerticalAlignment="Center"/>
                     </StackPanel>
@@ -452,22 +454,22 @@
     <Style x:Key="ModernRadioButton" TargetType="{x:Type RadioButton}">
         <Setter Property="Foreground" Value="#FFFFFFFF"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <StackPanel Orientation="Horizontal">
-                        <Grid Width="20" Height="20" Margin="0,0,10,0">
+                        <Grid Width="15" Height="15" Margin="0,0,6,0">
                             <Border x:Name="border"
                                     Background="#FF252525"
                                     BorderBrush="#FF3A3A3A"
                                     BorderThickness="1"
-                                    CornerRadius="10"/>
+                                    CornerRadius="8"/>
                             <Ellipse x:Name="check"
                                      Fill="#FF00E676"
                                      Visibility="Collapsed"
-                                     Margin="5"/>
+                                     Margin="4"/>
                         </Grid>
                         <ContentPresenter VerticalAlignment="Center"/>
                     </StackPanel>
@@ -488,7 +490,7 @@
     <Style x:Key="ModernExpander" TargetType="{x:Type Expander}">
         <Setter Property="Foreground" Value="#FF00E676"/>
         <Setter Property="FontFamily" Value="Segoe UI"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -502,12 +504,12 @@
                                 Background="#FF2F2F2F"
                                 BorderBrush="#FF00E676"
                                 BorderThickness="1"
-                                CornerRadius="4,4,0,0"
-                                Padding="10,8">
+                                CornerRadius="3,3,0,0"
+                                Padding="8,5">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="16"/>
                                 </Grid.ColumnDefinitions>
                                 <ContentPresenter Grid.Column="0"
                                                   ContentSource="Header"
@@ -529,10 +531,10 @@
                                 Background="#FF252525"
                                 BorderBrush="#FF3A3A3A"
                                 BorderThickness="1,0,1,1"
-                                CornerRadius="0,0,4,4"
+                                CornerRadius="0,0,3,3"
                                 Visibility="Collapsed"
                                 x:Name="contentBorder">
-                            <ContentPresenter Margin="10"/>
+                            <ContentPresenter Margin="8"/>
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -548,6 +550,52 @@
                             <Setter TargetName="arrow" Property="Fill" Value="#FF00C853"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernSlider" TargetType="Slider">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#FF00E676"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Track x:Name="PART_Track" Grid.Row="0">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="3" Background="#FF00E676" CornerRadius="1.5"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="12" Height="12" Fill="#FF00E676"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border Height="3" Background="#FF3A3A3A" CornerRadius="1.5"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

@@ -36,6 +36,22 @@ namespace SharpMonoInjector.Gui.Services
             Log(LogLevel.Info, "Logging service initialized", "System");
         }
 
+        private const long MaxLogFileBytes = 5 * 1024 * 1024; // 5 MB
+
+        private void RotateLogIfNeeded(string logPath)
+        {
+            try
+            {
+                if (File.Exists(logPath) && new FileInfo(logPath).Length >= MaxLogFileBytes)
+                {
+                    string oldPath = Path.ChangeExtension(logPath, ".old.txt");
+                    if (File.Exists(oldPath)) File.Delete(oldPath);
+                    File.Move(logPath, oldPath);
+                }
+            }
+            catch { }
+        }
+
         public void Log(LogLevel level, string message, string source = "")
         {
             Application.Current?.Dispatcher.Invoke(() =>
@@ -43,10 +59,13 @@ namespace SharpMonoInjector.Gui.Services
                 var entry = new LogEntry(level, message, source);
                 Logs.Add(entry);
 
-                File.AppendAllText(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DebugLog.txt"),
-                    entry.FullMessage + "\r\n"
-                );
+                try
+                {
+                    string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DebugLog.txt");
+                    RotateLogIfNeeded(logPath);
+                    File.AppendAllText(logPath, entry.FullMessage + "\r\n");
+                }
+                catch { }
             });
         }
 

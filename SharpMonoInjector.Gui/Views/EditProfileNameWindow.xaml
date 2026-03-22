@@ -4,20 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Edit Profile Name" Height="240" Width="450"
+        Title="Edit Profile Name" Height="200" Width="390"
         WindowStyle="None" ResizeMode="CanResize" Background="#FF1A1A1A" AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=NewNameTextBox}">
-    <Border BorderBrush="#FF00E676" BorderThickness="1" CornerRadius="12">
+    <Border BorderBrush="#FF00E676" BorderThickness="1" CornerRadius="8">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="140"/>
-                <RowDefinition Height="50"/>
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="42"/>
             </Grid.RowDefinitions>
 
             <!-- Modern Title Bar -->
-            <Border Grid.Row="0" Background="#FF000000" CornerRadius="12,12,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Border Grid.Row="0" Background="#FF000000" CornerRadius="8,8,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -25,20 +25,20 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,0,0,0">
-                        <TextBlock Text="✏️" FontSize="18" VerticalAlignment="Center" Foreground="#FF00E676" Margin="0,0,10,0"/>
-                        <TextBlock Text="Edit Profile Name" Foreground="#FF00E676" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="12,0,0,0">
+                        <TextBlock Text="✏️" FontSize="13" VerticalAlignment="Center" Foreground="#FF00E676" Margin="0,0,8,0"/>
+                        <TextBlock Text="Edit Profile Name" Foreground="#FF00E676" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <Button Grid.Column="2" Content="✕" Width="40" Height="40" Background="Transparent" Foreground="#FFFFFFFF"
-                            BorderThickness="0" FontSize="16" Click="Close_Click" Cursor="Hand" Margin="0,0,10,0">
+                    <Button Grid.Column="2" Content="✕" Width="32" Height="26" Background="Transparent" Foreground="#FFFFFFFF"
+                            BorderThickness="0" FontSize="13" Click="Close_Click" Cursor="Hand" Margin="0,0,8,0">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Background" Value="Transparent"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="8">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="3" Padding="4">
                                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                         </ControlTemplate>
@@ -57,49 +57,48 @@
             </Border>
 
             <!-- Main Content -->
-            <Grid Grid.Row="1" Margin="25">
+            <Grid Grid.Row="1" Margin="15">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Profile Name Input -->
-                <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid Grid.Row="0" Margin="0,0,0,8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Profile Name:" FontSize="14" FontWeight="SemiBold" Foreground="#FF00E676" Margin="0,0,0,8"/>
+                    <TextBlock Grid.Row="0" Text="Profile Name:" FontSize="11" FontWeight="SemiBold" Foreground="#FF00E676" Margin="0,0,0,5"/>
                     <TextBox x:Name="NewNameTextBox" Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                             FontSize="16" Padding="10,8" Background="#FF252525" Foreground="#FFFFFFFF"
-                             BorderBrush="#FF3A3A3A" BorderThickness="1" Margin="0,0,0,0"
+                             Style="{StaticResource ModernTextBox}"
                              ToolTip="Enter a new descriptive name for this injection profile"
                              IsEnabled="True" Focusable="True" IsReadOnly="False"/>
                 </Grid>
 
                 <!-- Help Text -->
                 <TextBlock Grid.Row="1" Text="💡 Profile names help you quickly identify different injection configurations"
-                           Foreground="#FF666666" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                           Foreground="#FF666666" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Top"/>
             </Grid>
 
             <!-- Modern Footer -->
-            <Border Grid.Row="2" Background="#FF1E1E1E" CornerRadius="0,0,12,12">
-                <Grid Margin="25,0">
+            <Border Grid.Row="2" Background="#FF1E1E1E" CornerRadius="0,0,8,8">
+                <Grid Margin="15,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{Binding ValidationMessage}" Foreground="#FFFF6B6B" FontSize="11" VerticalAlignment="Center"
+                    <TextBlock Grid.Column="0" Text="{Binding ValidationMessage}" Foreground="#FFFF6B6B" FontSize="10" VerticalAlignment="Center"
                                Visibility="{Binding HasValidationError, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                    <Button Grid.Column="1" Content="Cancel" Style="{StaticResource SecondaryButton}" Width="90" Margin="0,0,15,0"
-                            IsCancel="True" Click="Cancel_Click" Height="35"/>
-                    <Button Grid.Column="2" Content="💾 Save Name" Style="{StaticResource ModernButton}" Width="110"
+                    <Button Grid.Column="1" Content="Cancel" Style="{StaticResource SecondaryButton}" Width="75" Margin="0,0,10,0"
+                            IsCancel="True" Click="Cancel_Click" Height="26"/>
+                    <Button Grid.Column="2" Content="💾 Save Name" Style="{StaticResource ModernButton}" Width="95"
                             IsDefault="True" Command="{Binding SaveCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                            Height="35" FontSize="13"/>
+                            Height="26" FontSize="11"/>
                 </Grid>
             </Border>
         </Grid>

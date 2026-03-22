@@ -3,10 +3,13 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using System.Management;
 using Microsoft.Win32;
 using SharpMonoInjector.Gui.Models;
@@ -43,6 +46,9 @@ namespace SharpMonoInjector.Gui.ViewModels
         private readonly LoggingService _loggingService;
         private readonly ProcessMonitorService _monitorService;
         private AppSettings _settings;
+        private DispatcherTimer _autoRefreshTimer;
+        private DispatcherTimer _statusPollTimer;
+        private bool _isAutoRefresh;
 
         public MainWindowViewModel()
         {
@@ -58,7 +64,7 @@ namespace SharpMonoInjector.Gui.ViewModels
             AVAlert = AntivirusInstalled();
             if (AVAlert) { AVColor = "#FFA00668"; } else { AVColor = "#FF21AC40"; }
 
-            RefreshCommand = new RelayCommand(ExecuteRefreshCommand, CanExecuteRefreshCommand);
+            RefreshCommand = new RelayCommand(p => ExecuteRefreshCommand(p), CanExecuteRefreshCommand);
             BrowseCommand = new RelayCommand(ExecuteBrowseCommand);
             InspectAssemblyCommand = new RelayCommand(ExecuteInspectAssemblyCommand, CanExecuteInspectAssemblyCommand);
             InjectCommand = new RelayCommand(ExecuteInjectCommand, CanExecuteInjectCommand);
@@ -83,11 +89,27 @@ namespace SharpMonoInjector.Gui.ViewModels
             AddDependencyPathCommand = new RelayCommand(ExecuteAddDependencyPathCommand, CanExecuteAddDependencyPathCommand);
             RemoveDependencyPathCommand = new RelayCommand(ExecuteRemoveDependencyPathCommand);
             BrowseDependencyPathCommand = new RelayCommand(ExecuteBrowseDependencyPathCommand);
+            CopyRecentAssemblyPathCommand = new RelayCommand(ExecuteCopyRecentAssemblyPathCommand);
 
             _monitorService.ProcessDetected += OnProcessDetected;
 
             LoadSettings();
             UpdateDependencyPathsText();
+
+            _autoRefreshTimer = new DispatcherTimer();
+            _autoRefreshTimer.Tick += (s, e) =>
+            {
+                if (!IsRefreshing)
+                {
+                    _isAutoRefresh = true;
+                    ExecuteRefreshCommand(null);
+                }
+            };
+            UpdateAutoRefreshTimer();
+
+            _statusPollTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _statusPollTimer.Tick += (s, e) => PollProcessStatus();
+            _statusPollTimer.Start();
         }
 
         #region[Commands]
@@ -117,6 +139,7 @@ namespace SharpMonoInjector.Gui.ViewModels
         public RelayCommand AddDependencyPathCommand { get; }
         public RelayCommand RemoveDependencyPathCommand { get; }
         public RelayCommand BrowseDependencyPathCommand { get; }
+        public RelayCommand CopyRecentAssemblyPathCommand { get; }
 
         private void ExecuteOpenProcessMonitorCommand(object parameter)
         {
@@ -134,7 +157,10 @@ namespace SharpMonoInjector.Gui.ViewModels
         private void LoadSettings()
         {
             UseStealthMode = _settings.StealthModeDefault;
-            
+            InjectionDelayMs = _settings.InjectionDelayMs;
+            AutoRefreshEnabled = _settings.AutoRefreshEnabled;
+            AutoRefreshIntervalSecs = _settings.AutoRefreshIntervalSecs;
+
             RecentAssemblies = new ObservableCollection<string>(_settings.RecentAssemblies);
             RecentProfiles = new ObservableCollection<InjectionProfile>(_settings.RecentProfiles);
             WatchedProcesses = new ObservableCollection<WatchedProcess>(_settings.MonitorSettings.WatchedProcesses);
@@ -158,6 +184,9 @@ namespace SharpMonoInjector.Gui.ViewModels
         {
             _settings.LastAssemblyPath = AssemblyPath;
             _settings.StealthModeDefault = UseStealthMode;
+            _settings.InjectionDelayMs = InjectionDelayMs;
+            _settings.AutoRefreshEnabled = AutoRefreshEnabled;
+            _settings.AutoRefreshIntervalSecs = AutoRefreshIntervalSecs;
             _settings.MonitorSettings.WatchedProcesses = WatchedProcesses.ToList();
             _settings.MonitorSettings.AutoInjectOnDetection = AutoInject;
             _settings.MonitorSettings.ShowNotifications = ShowNotifications;
@@ -220,11 +249,28 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         private void ExecuteClearRecentsCommand(object parameter)
         {
+            var result = MessageBox.Show(
+                "Clear all recent assemblies and saved profiles?\n\nThis cannot be undone.",
+                "Clear All",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result != MessageBoxResult.Yes) return;
+
             _configService.ClearAllRecents();
             _settings = _configService.LoadSettings();
             RecentAssemblies.Clear();
             RecentProfiles.Clear();
             Status = "Recent items cleared";
+        }
+
+        private void ExecuteCopyRecentAssemblyPathCommand(object parameter)
+        {
+            if (parameter is string path)
+            {
+                try { Clipboard.SetText(path); Status = "Path copied to clipboard"; }
+                catch { }
+            }
         }
 
         private void ExecuteSelectRecentAssemblyCommand(object parameter)
@@ -307,9 +353,12 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         private async void ExecuteRefreshCommand(object parameter)
         {
-            _loggingService.Info("Starting process refresh", "ProcessScanner");
+            bool auto = _isAutoRefresh;
+            _isAutoRefresh = false;
+
+            if (!auto) _loggingService.Info("Starting process refresh", "ProcessScanner");
             IsRefreshing = true;
-            Status = "Refreshing processes";
+            if (!auto) Status = "Refreshing processes";
             ObservableCollection<MonoProcess> processes = new ObservableCollection<MonoProcess>();
 
             await Task.Run(() =>
@@ -321,18 +370,14 @@ namespace SharpMonoInjector.Gui.ViewModels
                     try
                     {
                         if (ScanOnlyMonoGames && !IsMonoGameProcess(p))
-                        {
-                            continue; 
-                        }
+                            continue;
 
                         var t = GetProcessUser(p);
 
                         if (t != null)
                         {
                             if (p.Id == cp)
-                            {
                                 continue;
-                            }
 
                             const ProcessAccessRights flags = ProcessAccessRights.PROCESS_QUERY_INFORMATION | ProcessAccessRights.PROCESS_VM_READ;
                             IntPtr handle;
@@ -341,39 +386,40 @@ namespace SharpMonoInjector.Gui.ViewModels
                             {
                                 if (ProcessUtils.GetMonoModule(handle, out IntPtr mono))
                                 {
-                                    _loggingService.Success($"Found Mono process: {p.ProcessName} (PID: {p.Id})", "ProcessScanner");
-                                    processes.Add(new MonoProcess
-                                    {
-                                        MonoModule = mono,
-                                        Id = p.Id,
-                                        Name = p.ProcessName
-                                    });
+                                    if (!auto) _loggingService.Success($"Found Mono process: {p.ProcessName} (PID: {p.Id})", "ProcessScanner");
+                                    processes.Add(new MonoProcess { MonoModule = mono, Id = p.Id, Name = p.ProcessName });
                                 }
-
                                 Native.CloseHandle(handle);
                             }
                         }
                     }
-                    catch(Exception e) 
-                    { 
-                        _loggingService.Error($"Error scanning {p.ProcessName}: {e.Message}", "ProcessScanner");
+                    catch (Exception e)
+                    {
+                        if (!auto) _loggingService.Error($"Error scanning {p.ProcessName}: {e.Message}", "ProcessScanner");
                     }
                 }
             });
 
             Processes = processes;
 
-            if (Processes.Count > 0)
+            if (!auto)
             {
-                Status = "Processes refreshed";
-                SelectedProcess = Processes[0];
-                _settings.AddRecentProcess(SelectedProcess.Name);
-                _loggingService.Success($"Process scan complete - {Processes.Count} Mono process(es) found", "ProcessScanner");
+                if (Processes.Count > 0)
+                {
+                    Status = "Processes refreshed";
+                    SelectedProcess = Processes[0];
+                    _settings.AddRecentProcess(SelectedProcess.Name);
+                    _loggingService.Success($"Process scan complete - {Processes.Count} Mono process(es) found", "ProcessScanner");
+                }
+                else
+                {
+                    Status = "No Mono processess found!";
+                    _loggingService.Warning("No Mono processes found", "ProcessScanner");
+                }
             }
-            else
+            else if (Processes.Count > 0 && SelectedProcess == null)
             {
-                Status = "No Mono processess found!";
-                _loggingService.Warning("No Mono processes found", "ProcessScanner");
+                SelectedProcess = Processes[0];
             }
 
             IsRefreshing = false;
@@ -440,17 +486,32 @@ namespace SharpMonoInjector.Gui.ViewModels
             }
         }
 
+        private bool _showValidation;
+
         private bool CanExecuteInjectCommand(object parameter)
         {
             return SelectedProcess != null &&
                 File.Exists(AssemblyPath) &&
-                !string.IsNullOrEmpty(InjectClassName) &&
-                !string.IsNullOrEmpty(InjectMethodName) &&
                 !IsExecuting;
         }
 
         private void ExecuteInjectCommand(object parameter)
         {
+            // Validate required fields and give feedback
+            bool classEmpty  = string.IsNullOrWhiteSpace(InjectClassName);
+            bool methodEmpty = string.IsNullOrWhiteSpace(InjectMethodName);
+            if (classEmpty || methodEmpty)
+            {
+                _showValidation = true;
+                RaisePropertyChanged(nameof(ShowClassNameError));
+                RaisePropertyChanged(nameof(ShowMethodNameError));
+                var missing = classEmpty && methodEmpty ? "Class name and Method name"
+                            : classEmpty ? "Class name"
+                            : "Method name";
+                Status = $"⚠ Required field missing: {missing}";
+                return;
+            }
+
             Process gameProcess;
             try
             {
@@ -1112,6 +1173,14 @@ namespace SharpMonoInjector.Gui.ViewModels
             }
 
             IsExecuting = true;
+            InjectionProgress = 5;
+
+            if (InjectionDelayMs > 0)
+            {
+                Status = $"Waiting {InjectionDelayMs}ms before injection...";
+                Thread.Sleep(InjectionDelayMs);
+            }
+
             Status = "Injecting " + Path.GetFileName(AssemblyPath);
             InjectionProgress = 10;
 
@@ -1595,8 +1664,50 @@ namespace SharpMonoInjector.Gui.ViewModels
 
         public void Cleanup()
         {
+            _autoRefreshTimer?.Stop();
+            _statusPollTimer?.Stop();
             _monitorService?.Dispose();
             SaveCurrentSettings();
+        }
+
+
+        private void UpdateAutoRefreshTimer()
+        {
+            if (_autoRefreshTimer == null) return;
+            _autoRefreshTimer.Stop();
+            if (AutoRefreshEnabled)
+            {
+                _autoRefreshTimer.Interval = TimeSpan.FromSeconds(Math.Max(1, AutoRefreshIntervalSecs));
+                _autoRefreshTimer.Start();
+            }
+        }
+
+        private void PollProcessStatus()
+        {
+            if (Processes == null) return;
+            foreach (var p in Processes)
+            {
+                try
+                {
+                    var proc = Process.GetProcessById(p.Id);
+                    p.IsAlive = !proc.HasExited;
+                }
+                catch
+                {
+                    p.IsAlive = false;
+                }
+            }
+        }
+
+        public void InjectFromTray()
+        {
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                if (CanExecuteInjectCommand(null))
+                    ExecuteInjectCommand(null);
+                else
+                    Status = "Cannot inject: check process, assembly and class/method fields";
+            });
         }
 
         #endregion
@@ -1695,9 +1806,31 @@ namespace SharpMonoInjector.Gui.ViewModels
             {
                 Set(ref _assemblyPath, value);
                 if (File.Exists(_assemblyPath))
+                {
                     InjectNamespace = Path.GetFileNameWithoutExtension(_assemblyPath);
+                    UpdateAssemblyVersionInfo(_assemblyPath);
+                }
+                else
+                {
+                    AssemblyVersionInfo = null;
+                }
                 InjectCommand.RaiseCanExecuteChanged();
                 SaveProfileCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private void UpdateAssemblyVersionInfo(string path)
+        {
+            try
+            {
+                var name = AssemblyName.GetAssemblyName(path);
+                var ver = name.Version;
+                var target = name.ProcessorArchitecture;
+                AssemblyVersionInfo = $"v{ver}  |  {target}";
+            }
+            catch
+            {
+                AssemblyVersionInfo = null;
             }
         }
 
@@ -1722,8 +1855,11 @@ namespace SharpMonoInjector.Gui.ViewModels
                 EjectClassName = value;
                 InjectCommand.RaiseCanExecuteChanged();
                 SaveProfileCommand.RaiseCanExecuteChanged();
+                RaisePropertyChanged(nameof(ShowClassNameError));
             }
         }
+
+        public bool ShowClassNameError  => _showValidation && string.IsNullOrWhiteSpace(InjectClassName);
 
         private string _injectMethodName;
         public string InjectMethodName
@@ -1736,8 +1872,11 @@ namespace SharpMonoInjector.Gui.ViewModels
                     EjectMethodName = "Unload";
                 InjectCommand.RaiseCanExecuteChanged();
                 SaveProfileCommand.RaiseCanExecuteChanged();
+                RaisePropertyChanged(nameof(ShowMethodNameError));
             }
         }
+
+        public bool ShowMethodNameError => _showValidation && string.IsNullOrWhiteSpace(InjectMethodName);
 
         private ObservableCollection<InjectedAssembly> _injectedAssemblies = new ObservableCollection<InjectedAssembly>();
         public ObservableCollection<InjectedAssembly> InjectedAssemblies
@@ -1936,6 +2075,49 @@ namespace SharpMonoInjector.Gui.ViewModels
             set => Set(ref _newDependencyPath, value);
         }
 
+        private int _injectionDelayMs;
+        public int InjectionDelayMs
+        {
+            get => _injectionDelayMs;
+            set => Set(ref _injectionDelayMs, value);
+        }
+
+        private bool _autoRefreshEnabled;
+        public bool AutoRefreshEnabled
+        {
+            get => _autoRefreshEnabled;
+            set
+            {
+                Set(ref _autoRefreshEnabled, value);
+                UpdateAutoRefreshTimer();
+                if (_autoRefreshTimer != null) SaveCurrentSettings();
+            }
+        }
+
+        private int _autoRefreshIntervalSecs = 10;
+        public int AutoRefreshIntervalSecs
+        {
+            get => _autoRefreshIntervalSecs;
+            set
+            {
+                Set(ref _autoRefreshIntervalSecs, value);
+                UpdateAutoRefreshTimer();
+            }
+        }
+
+        private string _assemblyVersionInfo;
+        public string AssemblyVersionInfo
+        {
+            get => _assemblyVersionInfo;
+            set
+            {
+                Set(ref _assemblyVersionInfo, value);
+                RaisePropertyChanged(nameof(HasAssemblyVersionInfo));
+            }
+        }
+
+        public bool HasAssemblyVersionInfo => !string.IsNullOrEmpty(AssemblyVersionInfo);
+
         #endregion
 
         #region[Process Refresh Fix]
@@ -2070,5 +2252,6 @@ namespace SharpMonoInjector.Gui.ViewModels
         }
 
         #endregion
+
     }
 }
