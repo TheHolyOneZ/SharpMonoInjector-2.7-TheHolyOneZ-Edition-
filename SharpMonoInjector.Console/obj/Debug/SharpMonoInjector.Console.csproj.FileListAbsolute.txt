@@ -1,0 +1,8 @@
+C:\Users\etien\Documents\SharpMonoInjector\build\debug\smi.exe.config
+C:\Users\etien\Documents\SharpMonoInjector\build\debug\smi.exe
+C:\Users\etien\Documents\SharpMonoInjector\build\debug\smi.pdb
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Console\obj\Debug\SharpMonoInjector.Console.csproj.AssemblyReference.cache
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Console\obj\Debug\SharpMonoInjector.Console.csproj.CoreCompileInputs.cache
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Console\obj\Debug\SharpMon.7AE4526D.Up2Date
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Console\obj\Debug\smi.exe
+C:\Users\etien\Documents\SharpMonoInjector\SharpMonoInjector.Console\obj\Debug\smi.pdb
