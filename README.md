@@ -1,3 +1,22 @@
+  > [!WARNING]
+  > **This project is superseded by [ZyMono](https://github.com/TheHolyOneZ/ZyMono).**
+  > ZyMono is the actively maintained successor — smart auto-routing between direct injection and a BepInEx pipe receiver, entry-point
+  validation, saved profiles, and a native Tauri UI. This repo still works and stays up for existing setups, but new installs should grab
+  ZyMono instead.
+  >
+  > - **Get ZyMono:** https://zlogic.eu/zymono/
+  > - **Source:** https://github.com/TheHolyOneZ/ZyMono
+  > - **Browse all injectors (Windows + Linux):** https://zlogic.eu/mods/index.php?page=injectors
+
+
+
+
+
+
+
+
+
+
 ![License](https://img.shields.io/github/license/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![Issues](https://img.shields.io/github/issues/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
 ![PRs](https://img.shields.io/github/issues-pr/TheHolyOneZ/SharpMonoInjector-2.7-TheHolyOneZ-Edition-)
